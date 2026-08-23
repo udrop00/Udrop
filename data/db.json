@@ -42,9 +42,31 @@
     "c7ee28bf66913e3b0e492fde066492a0738453bcf3de0ab3642ebeb0d66c59ff": {
       "userId": "888ab861-4e8c-475a-b514-18aa1ca43c49",
       "expiresAt": 1790020955267
+    },
+    "35f993cbbd295b0c2260cb0822501aecc24b91af898e08c14ffa8abf53efbd2f": {
+      "userId": "admin-001",
+      "expiresAt": 1790062320349
+    },
+    "f75406ef6a13d587cddd40e0bac66144bec1f7ddded9d2891c9c611fac000a96": {
+      "userId": "admin-001",
+      "expiresAt": 1790073312446
     }
   },
   "activity": [
+    {
+      "id": "0c5ab7ca-da49-4518-9b66-62c3f94a6016",
+      "userId": "admin-001",
+      "action": "LOGIN",
+      "description": "Successful login",
+      "createdAt": "2026-08-23T10:35:12.445Z"
+    },
+    {
+      "id": "a7a65698-de23-4fe9-aa0f-b352b9949f5b",
+      "userId": "admin-001",
+      "action": "LOGIN",
+      "description": "Successful login",
+      "createdAt": "2026-08-23T07:32:00.348Z"
+    },
     {
       "id": "a994c149-935c-4ee2-a19e-de5411001638",
       "userId": "888ab861-4e8c-475a-b514-18aa1ca43c49",
