@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 
-type User = { id:string; name:string; username?:string; email:string; phone?:string; countryCode?:string; country?:string; profileImage?:string; passwordHash:string; salt:string; role:"customer"|"admin"; status:"Active"|"Suspended"; createdAt:string };
+type User = { id:string; name:string; username?:string; email:string; phone?:string; countryCode?:string; country?:string; profileImage?:string; passwordHash:string; salt:string; role:"customer"|"admin"; status:"Active"|"Suspended"; createdAt:string; balance?:number; profit?:number };
 type Message = { id:string; conversationId:string; senderId:string; text:string; imageUrl?:string; createdAt:string; readBy?:string[] };
 type Conversation = { id:string; customerId:string; status:"open"|"closed"; updatedAt:string };
 type Invite = { id:string; token:string; createdBy:string; createdAt:string; expiresAt:number; usedAt?:string; usedBy?:string; revokedAt?:string };
