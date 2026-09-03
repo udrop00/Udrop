@@ -29,12 +29,14 @@ export async function POST(req: Request) {
 
     // 1. GUARANTEED ADMIN LOGIN
     if (isAdminAttempt && (pwd === "admin@ubuy" || pwd === "admin123" || pwd === "admin" || pwd === "admin@dropzone.com")) {
-      let admin = db.users.find((u: any) => u.role === "admin");
+      let admin: any = db.users.find((u: any) => u.role === "admin");
       if (!admin) {
         admin = {
           id: "admin-001",
           name: "Drop Zone Admin",
           email: "admin@dropzone.com",
+          passwordHash: "a93f776539bec0aa7af135520bd12df97322ac57a24eadbee2aa2b4438d4e62db483a257d62079a24a80192726d292b349c9ab2f3c6f5a9d8941d7dd15417022",
+          salt: "03b5cd8a9748e0b32368de7722cb7390",
           role: "admin",
           status: "Active",
           createdAt: new Date().toISOString()
