@@ -185,7 +185,9 @@ router.push("/kyc-pending");
 
       <section className="auth-card">
 
-        <div className="auth-icon">+</div>
+        <div className="auth-icon" style={{ background: "transparent", width: "auto", height: "auto", display: "flex", alignItems: "center", marginBottom: "20px", boxShadow: "none" }}>
+          <img src="/dropzone-logo.png" alt="Ubuy" style={{ height: "55px", width: "auto", objectFit: "contain" }} />
+        </div>
 
         <h1>Create account</h1>
 
@@ -216,7 +218,7 @@ router.push("/kyc-pending");
 
 
 
-        <form className="auth-form" onSubmit={submit}>
+        <form className="auth-form" onSubmit={submit} autoComplete="off">
 
 
           {error && (

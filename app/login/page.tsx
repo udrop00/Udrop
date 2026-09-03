@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { saveSession } from "../lib";
 import { Logo } from "../components";
@@ -16,6 +16,11 @@ export default function Login() {
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setEmail("");
+    setPassword("");
+  }, []);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -91,8 +96,8 @@ else{
 
       <section className="auth-card">
 
-        <div className="auth-icon">
-          D
+        <div className="auth-icon" style={{ background: "transparent", width: "auto", height: "auto", display: "flex", alignItems: "center", marginBottom: "20px", boxShadow: "none" }}>
+          <img src="/dropzone-logo.png" alt="Ubuy" style={{ height: "55px", width: "auto", objectFit: "contain" }} />
         </div>
 
 
@@ -107,7 +112,7 @@ else{
 
 
 
-        <form className="auth-form" onSubmit={submit}>
+        <form className="auth-form" onSubmit={submit} autoComplete="off">
 
 
           {error && (
@@ -122,7 +127,9 @@ else{
             Email
 
             <input
-              type="email"
+              type="text"
+              name="user_email_address_field"
+              autoComplete="off"
               value={email}
               onChange={(e)=>setEmail(e.target.value)}
               placeholder="you@example.com"
@@ -144,6 +151,8 @@ else{
 
               <input
                 type={showPassword ? "text" : "password"}
+                name="user_login_secret_field"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e)=>setPassword(e.target.value)}
                 placeholder="••••••••"
