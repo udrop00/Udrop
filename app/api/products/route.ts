@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readDB, writeDB, userFromRequest } from "../../lib/server";
+import { DEFAULT_PRODUCTS } from "../../lib/defaultProducts";
 import crypto from "node:crypto";
 
 export const runtime = "nodejs";
@@ -10,9 +11,14 @@ export async function GET() {
 
   const db = readDB();
 
+  if (!db.products || db.products.length === 0) {
+    db.products = DEFAULT_PRODUCTS;
+    writeDB(db);
+  }
+
   return NextResponse.json(
     {
-      products: db.products || []
+      products: db.products
     },
     {
       headers:{

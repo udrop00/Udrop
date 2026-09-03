@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { UserShell } from "../components";
 import { apiFetch, apiMe } from "../lib";
+import { DEFAULT_PRODUCTS } from "../lib/defaultProducts";
 
 
 export default function Products() {
 
-  const [products,setProducts] = useState<any[]>([]);
+  const [products,setProducts] = useState<any[]>(DEFAULT_PRODUCTS);
   const [q,setQ] = useState("");
 
   const [storeProductIds,setStoreProductIds] = useState<Set<string>>(new Set());
@@ -22,26 +23,18 @@ export default function Products() {
 
 
   const loadProducts = async()=>{
-
-   const productsRes = await apiFetch(
-  "/api/products",
-  {
-    cache:"no-store"
-  }
-);
-
-
-const productsData = await productsRes.json();
-
-
-
-    setProducts(
-      productsData.products || []
-    );
-
-
-
-  
+    try {
+      const productsRes = await apiFetch(
+        "/api/products",
+        {
+          cache:"no-store"
+        }
+      );
+      const productsData = await productsRes.json();
+      if (Array.isArray(productsData?.products) && productsData.products.length > 0) {
+        setProducts(productsData.products);
+      }
+    } catch {}
   };
 
 

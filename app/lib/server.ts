@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { DEFAULT_PRODUCTS } from "./defaultProducts";
 
 type User = { id:string; name:string; username?:string; email:string; phone?:string; countryCode?:string; country?:string; profileImage?:string; passwordHash?:string; salt?:string; role:"customer"|"admin"; status:"Active"|"Suspended"; createdAt:string; balance?:number; profit?:number; guaranteeMoney?:number; sellerRating?:number; shopName?:string; currentPackage?:string|null; currentPackageName?:string; packageStatus?:string; packageExpiry?:string|null; productLimit?:number; commissionRate?:number; kycStatus?:string; documents?:any[]; [key:string]:any };
 type Message = { id:string; conversationId:string; senderId:string; text:string; imageUrl?:string; createdAt:string; readBy?:string[] };
@@ -15,7 +16,7 @@ function ensure(){
     if(fs.existsSync(seedFile)){
       fs.copyFileSync(seedFile,file);
     } else {
-      fs.writeFileSync(file,JSON.stringify({users:[],sessions:{},activity:[],conversations:[],messages:[],invites:[],packages:[],packageRequests:[],withdrawals:[],sellerProducts:[],notifications:[],products:[]},null,2));
+      fs.writeFileSync(file,JSON.stringify({users:[],sessions:{},activity:[],conversations:[],messages:[],invites:[],packages:[],packageRequests:[],withdrawals:[],sellerProducts:[],notifications:[],products:DEFAULT_PRODUCTS},null,2));
     }
   }
 }
@@ -48,6 +49,12 @@ export function readDB():DB{
     writeDB(db);
   }
 
+  // Ensure all 300 products are populated
+  if (!db.products || db.products.length === 0) {
+    db.products = DEFAULT_PRODUCTS;
+    writeDB(db);
+  }
+
   // Auto-activate Silver package by default for all customer accounts
   let updatedUsers = false;
   for (const u of db.users) {
@@ -64,18 +71,6 @@ export function readDB():DB{
   }
   if (updatedUsers) {
     writeDB(db);
-  }
-
-  // If products are missing on volume, load from seed
-  if(db.products.length===0 && fs.existsSync(seedFile)){
-    try{
-      const seedData = JSON.parse(fs.readFileSync(seedFile,"utf8"));
-      if(Array.isArray(seedData.products) && seedData.products.length>0){
-        db.products = seedData.products;
-        if(db.packages.length===0 && Array.isArray(seedData.packages)) db.packages = seedData.packages;
-        writeDB(db);
-      }
-    }catch{}
   }
 
   // Ensure Admin exists
