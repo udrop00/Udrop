@@ -118,12 +118,12 @@ kycDocuments: [
   }
 ],
 
-      currentPackage: "",
-currentPackageName: "",
-packageStatus: "none",
-packageExpiry: "",
-commissionRate: 0,
-productLimit: 0,
+      currentPackage: "silver",
+      currentPackageName: "Silver",
+      packageStatus: "active",
+      packageExpiry: "",
+      commissionRate: 20,
+      productLimit: 100,
 
       walletBalance: 0,
       pendingBalance: 0,

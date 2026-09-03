@@ -37,6 +37,35 @@ export function readDB():DB{
   if(!db.sellerProducts) db.sellerProducts=[];
   if(!db.notifications) db.notifications=[];
 
+  const DEFAULT_PACKAGES = [
+    { id: "silver", name: "Silver", price: 0, productLimit: 100, commission: 20, status: "Active" },
+    { id: "bronze", name: "Bronze", price: 1999, productLimit: 200, commission: 25, status: "Active" },
+    { id: "diamond", name: "Diamond", price: 2999, productLimit: 300, commission: 30, status: "Active" }
+  ];
+
+  if (!db.packages || db.packages.length === 0) {
+    db.packages = DEFAULT_PACKAGES;
+    writeDB(db);
+  }
+
+  // Auto-activate Silver package by default for all customer accounts
+  let updatedUsers = false;
+  for (const u of db.users) {
+    if (u.role === "customer") {
+      if (!u.currentPackageName || u.currentPackageName === "" || u.packageStatus === "none" || !u.currentPackage) {
+        u.currentPackage = "silver";
+        u.currentPackageName = "Silver";
+        u.packageStatus = "active";
+        u.productLimit = Number(u.productLimit) > 0 ? u.productLimit : 100;
+        u.commissionRate = Number(u.commissionRate) > 0 ? u.commissionRate : 20;
+        updatedUsers = true;
+      }
+    }
+  }
+  if (updatedUsers) {
+    writeDB(db);
+  }
+
   // If products are missing on volume, load from seed
   if(db.products.length===0 && fs.existsSync(seedFile)){
     try{

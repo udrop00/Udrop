@@ -31,9 +31,15 @@ function PackageBadge({
   );
 }
 
+const DEFAULT_FALLBACK_PACKAGES = [
+  { id: "silver", name: "Silver", price: 0, productLimit: 100, commission: 20, status: "Active" },
+  { id: "bronze", name: "Bronze", price: 1999, productLimit: 200, commission: 25, status: "Active" },
+  { id: "diamond", name: "Diamond", price: 2999, productLimit: 300, commission: 30, status: "Active" }
+];
+
 export default function TrafficPackages(){
 
-  const [packages,setPackages]=useState<any[]>([]);
+  const [packages,setPackages]=useState<any[]>(DEFAULT_FALLBACK_PACKAGES);
   const [currentUserPackage,setCurrentUserPackage]=useState("");
   const [message,setMessage]=useState("");
   const [messageOk,setMessageOk]=useState(false);
@@ -46,7 +52,9 @@ export default function TrafficPackages(){
         apiMe()
       ]);
       const pkgData = await pkgRes.json();
-      setPackages(pkgData.packages || []);
+      if (Array.isArray(pkgData?.packages) && pkgData.packages.length > 0) {
+        setPackages(pkgData.packages);
+      }
       setCurrentUserPackage(meRes?.user?.currentPackageName || "");
     } catch {}
   }, []);

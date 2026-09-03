@@ -127,9 +127,14 @@ export async function PATCH(req:Request){
 
     // Default Silver Package Activation
 
-    const silverPackage = db.packages.find(
+    const silverPackage = (db.packages || []).find(
       (p:any)=>p.name==="Silver"
-    );
+    ) || {
+      id: "silver",
+      name: "Silver",
+      productLimit: 100,
+      commission: 20
+    };
 
 
     if(silverPackage){
