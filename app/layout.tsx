@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SalesmartlyWidget from "./salesmartly-widget";
 
 export const metadata: Metadata = {
-  title: "Drop Zone",
-  description: "Drop Zone dashboard and admin experience"
+  title: "Ubuy",
+  description: "Ubuy seller and admin dashboard"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -12,7 +13,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   <body>
     {children}
 
-    <script src="https://plugin-code.salesmartly.com/js/project_817900_847707_1788084399.js"></script>
+    <SalesmartlyWidget />
 
   </body>
 </html>

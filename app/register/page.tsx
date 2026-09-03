@@ -190,7 +190,7 @@ router.push("/kyc-pending");
         <h1>Create account</h1>
 
         <p>
-          Start your private Drop Zone workspace.
+          Start your private Ubuy workspace.
         </p>
 
 

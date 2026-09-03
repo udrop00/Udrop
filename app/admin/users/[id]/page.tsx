@@ -7,6 +7,7 @@ import Link from "next/link";
 import {useParams} from "next/navigation";
 import {AdminShell} from "../../../components";
 import {apiFetch,useRealtimeStream} from "../../../lib";
+import {orderStatusLabel} from "../../../order-statuses";
 
 
 export default function UserDetail(){
@@ -23,6 +24,10 @@ export default function UserDetail(){
 
   const [sellerRating,setSellerRating]=useState("0");
   const [savingRating,setSavingRating]=useState(false);
+
+  const [adjust,setAdjust]=useState("");
+  const [adjustTarget,setAdjustTarget]=useState<"balance"|"profit">("balance");
+  const [adjusting,setAdjusting]=useState(false);
 
   const [message,setMessage]=useState("");
 
@@ -228,6 +233,86 @@ else{
 
   };
 
+
+  const fundsAdjust=async(mode:"add"|"deduct")=>{
+
+    if(!adjust||adjusting) return;
+
+    const num = Math.round(Number(adjust) * 100) / 100;
+    if (!Number.isFinite(num) || num <= 0) {
+      setMessage("Please enter a valid positive amount.");
+      return;
+    }
+
+    setAdjusting(true);
+    setMessage("");
+    setAdjust("");
+
+    try {
+      const r=await apiFetch(
+        adjustTarget==="balance" ? "/api/admin/balance" : "/api/admin/profit",
+        {
+          method:"PATCH",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ userId:id, amount:num, mode })
+        }
+      );
+
+      const d=await r.json();
+
+      if (r.ok && d.user) {
+        setUser((prev:any)=>prev ? { ...prev, [adjustTarget]: d.user[adjustTarget] } : prev);
+        setMessage(`${adjustTarget==="balance" ? "Total Balance" : "Total Profit"} updated to $${Number(d.user[adjustTarget]).toFixed(2)}`);
+      } else {
+        setMessage(d.error || "Update failed");
+      }
+    } catch {
+      setMessage("Update failed");
+    } finally {
+      setAdjusting(false);
+    }
+
+  };
+
+
+  const nextOrderStatus=(status:string)=>{
+
+    if(status==="pending") return "handed_over";
+    if(status==="handed_over") return "on_the_way";
+    if(status==="on_the_way") return "delivered";
+    if(status==="delivered") return "completed";
+
+    return "";
+
+  };
+
+
+  const updateOrderStatus=async(orderId:string,status:string)=>{
+
+    setMessage("");
+
+    const r=await apiFetch(
+      `/api/admin/orders/${orderId}`,
+      {
+        method:"PATCH",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({status})
+      }
+    );
+
+    const d=await r.json();
+
+    if(!r.ok){
+      setMessage(d.error || "Could not update order");
+      return;
+    }
+
+    setMessage(`Order status changed to ${orderStatusLabel(status)}`);
+
+    load();
+
+  };
+
   if(loading){
 
     return(
@@ -316,14 +401,35 @@ else{
 
 
 
-        <Link
-          href="/admin/users"
-          className="btn btn-small"
-        >
+        <div className="action-row">
 
-          ← Back Users
+          {user.role !== "admin" && (
 
-        </Link>
+            <button
+              className="btn btn-small"
+              onClick={() =>
+                window.open(
+                  `/admin/impersonate?userId=${user.id}`,
+                  "_blank"
+                )
+              }
+            >
+              Login as Seller
+            </button>
+
+          )}
+
+
+          <Link
+            href="/admin/users"
+            className="btn btn-small"
+          >
+
+            ← Back Users
+
+          </Link>
+
+        </div>
 
 
 
@@ -444,6 +550,24 @@ else{
         </div>
 
 
+        <div className="stat">
+
+          <span>
+            Total Profit
+          </span>
+
+
+          <strong>
+            ${Number(user.profit||0).toFixed(2)}
+          </strong>
+
+
+          <small>
+            Earned commissions
+          </small>
+
+
+        </div>
 
 
 
@@ -496,6 +620,70 @@ else{
 
 
 
+
+
+      <section className="panel">
+
+        <div className="panel-head">
+          <div>
+            <span className="eyebrow">Funds</span>
+            <h2>Balance & Profit Control</h2>
+          </div>
+
+          <Link
+            className="btn btn-small"
+            href={`/admin/pos?customerId=${id}`}
+          >
+            Create Order For This Seller
+          </Link>
+        </div>
+
+        <label>
+          Adjust
+
+          <div className="adjust-row" style={{marginBottom:8}}>
+            <select value={adjustTarget} onChange={e=>setAdjustTarget(e.target.value as "balance"|"profit")}>
+              <option value="balance">Total Balance</option>
+              <option value="profit">Total Profit</option>
+            </select>
+          </div>
+
+          <div className="adjust-row" style={{maxWidth:"520px"}}>
+
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="Amount"
+              value={adjust}
+              disabled={adjusting}
+              onChange={e=>setAdjust(e.target.value)}
+            />
+
+            <button
+              className="btn btn-small"
+              disabled={adjusting || !adjust}
+              onClick={()=>fundsAdjust("add")}
+            >
+              {adjusting ? "Processing..." : "+ Add"}
+            </button>
+
+            <button
+              className="btn btn-small danger-btn"
+              disabled={adjusting || !adjust}
+              onClick={()=>fundsAdjust("deduct")}
+            >
+              {adjusting ? "Processing..." : "− Deduct"}
+            </button>
+
+          </div>
+        </label>
+
+        <small className="hint">
+          Only that seller&apos;s own store products are shown when creating an order for them from the POS page.
+        </small>
+
+      </section>
 
 
       <section className="panel">
@@ -767,6 +955,11 @@ else{
                 </th>
 
 
+                <th>
+                  Next Step
+                </th>
+
+
               </tr>
 
 
@@ -787,7 +980,7 @@ else{
                   <tr>
 
 
-                    <td colSpan={4}>
+                    <td colSpan={5}>
 
                       No orders yet.
 
@@ -846,13 +1039,35 @@ else{
 
 
                         <span
-                          className={`status ${o.status}`}
+                          className={`status order-status ${o.status}`}
                         >
 
-                          {o.status}
+                          {orderStatusLabel(o.status)}
 
                         </span>
 
+
+                      </td>
+
+
+                      <td>
+
+                        {
+                          nextOrderStatus(o.status)
+                          ?
+                          <div className="status-action">
+
+                            <button
+                              className="table-btn"
+                              onClick={()=>updateOrderStatus(o.id, nextOrderStatus(o.status))}
+                            >
+                              Mark {orderStatusLabel(nextOrderStatus(o.status))}
+                            </button>
+
+                          </div>
+                          :
+                          <span className="hint">Completed</span>
+                        }
 
                       </td>
 

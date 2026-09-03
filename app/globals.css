@@ -243,7 +243,7 @@ padding:25px 18px;
   }
 
 }
-/* Drop Zone Premium Dark Glass Theme */
+/* Ubuy Premium Dark Glass Theme */
 
 .app-shell{
   background:
@@ -623,7 +623,7 @@ filter:blur(90px);
 pointer-events:none;
 
 }
-/* Drop Zone Network Background */
+/* Ubuy Network Background */
 
 .app-shell{
 position:relative;
@@ -1537,13 +1537,6 @@ width:100%;
   gap:12px;
 }
 
-.dashboard-logo{
-  width:45px;
-  height:45px;
-  object-fit:contain;
-  cursor:pointer;
-}
-
 .customer-search-box{
   position:relative;
 }
@@ -2262,18 +2255,27 @@ margin-left:22px;
 .dashboard-logo{
   display:flex;
   align-items:center;
+  gap:9px;
   cursor:pointer;
 }
 
 .dashboard-logo img{
-  width:42px;
-  height:42px;
+  height:34px;
+  width:auto;
   object-fit:contain;
   transition:.3s ease;
+  border-radius:6px;
+}
+
+.dashboard-logo-text{
+  font-weight:900;
+  font-size:19px;
+  letter-spacing:.02em;
+  color:#f4f7ff;
 }
 
 .dashboard-logo img:hover{
-  transform:scale(1.08);
+  transform:scale(1.05);
 }
 .plan-centered{
   flex-direction: column;

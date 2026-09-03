@@ -6,6 +6,8 @@ import { apiFetch, useRealtimeStream } from "../../lib";
 
 export default function AdminProducts() {
 
+  const [tab, setTab] = useState<"all"|"seller">("all");
+
   const [products, setProducts] = useState<any[]>([]);
   const [q, setQ] = useState("");
 
@@ -214,28 +216,58 @@ setStatus("Active");
         </div>
 
 
-        <button
-          className="btn btn-small"
-          onClick={()=>{
+        {tab==="all" && (
+          <button
+            className="btn btn-small"
+            onClick={()=>{
 
-            resetForm();
+              resetForm();
 
-            setShowForm(!showForm);
+              setShowForm(!showForm);
 
-          }}
-        >
+            }}
+          >
 
-          {showForm
-            ? "Close"
-            : "Add Product"
-          }
+            {showForm
+              ? "Close"
+              : "Add Product"
+            }
 
-        </button>
+          </button>
+        )}
 
 
       </div>
 
 
+      <div className="tabs" style={{display:"flex",gap:8,marginBottom:16}}>
+
+        <button
+          className={`table-btn${tab==="all" ? " active" : ""}`}
+          style={tab==="all" ? {background:"var(--accent, #2563eb)",color:"#fff"} : {}}
+          onClick={()=>setTab("all")}
+        >
+          All Products
+        </button>
+
+        <button
+          className={`table-btn${tab==="seller" ? " active" : ""}`}
+          style={tab==="seller" ? {background:"var(--accent, #2563eb)",color:"#fff"} : {}}
+          onClick={()=>setTab("seller")}
+        >
+          Seller Products
+        </button>
+
+      </div>
+
+
+      {tab==="seller" ? (
+
+        <SellerProductsPanel />
+
+      ) : (
+
+      <>
 
       {message && (
 
@@ -552,9 +584,224 @@ setStatus("Active");
 
       </section>
 
+      </>
 
+      )}
 
     </AdminShell>
+
+  );
+
+}
+
+
+
+
+function SellerProductsPanel(){
+
+  const [email, setEmail] = useState("");
+  const [sellers, setSellers] = useState<any[]>([]);
+  const [seller, setSeller] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const searchSellers = useCallback((value:string)=>{
+    setEmail(value);
+    setSeller(null);
+    setItems([]);
+
+    if(!value.trim()){
+      setSellers([]);
+      return;
+    }
+
+    apiFetch(`/api/admin/seller-products?email=${encodeURIComponent(value.trim())}`)
+      .then(r=>r.json())
+      .then(d=>setSellers(d.sellers || []))
+      .catch(()=>{});
+
+  },[]);
+
+  const openSeller = useCallback((id:string)=>{
+
+    setLoading(true);
+    setMessage("");
+
+    apiFetch(`/api/admin/seller-products?sellerId=${id}`)
+      .then(r=>r.json())
+      .then(d=>{
+        setSeller(d.seller || null);
+        setItems(d.items || []);
+        setSellers([]);
+      })
+      .catch(()=>setMessage("Unable to load seller products."))
+      .finally(()=>setLoading(false));
+
+  },[]);
+
+  const removeOne = async(id:string)=>{
+
+    if(!confirm("Remove this product from the seller's store?")) return;
+
+    const r = await apiFetch("/api/admin/seller-products", {
+      method:"DELETE",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({id})
+    });
+
+    if(r.ok){
+      setItems(prev => prev.filter(it=>it.id!==id));
+      setMessage("Product removed from seller's store.");
+    } else {
+      setMessage("Unable to remove product.");
+    }
+
+  };
+
+  const removeAll = async()=>{
+
+    if(!seller) return;
+
+    if(!confirm(`Remove ALL products from ${seller.email}'s store? This cannot be undone.`)) return;
+
+    const r = await apiFetch("/api/admin/seller-products", {
+      method:"DELETE",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sellerId:seller.id, all:true})
+    });
+
+    if(r.ok){
+      setItems([]);
+      setMessage("All products removed from seller's store.");
+    } else {
+      setMessage("Unable to remove products.");
+    }
+
+  };
+
+  return (
+
+    <section className="panel">
+
+      <div className="panel-head">
+        <div>
+          <span className="eyebrow">Seller Products</span>
+          <h2>Search by seller email</h2>
+        </div>
+      </div>
+
+      {message && (
+        <div className="info-banner">{message}</div>
+      )}
+
+      <input
+        className="search"
+        placeholder="Search seller by email..."
+        value={email}
+        onChange={e=>searchSellers(e.target.value)}
+        style={{maxWidth:420, marginBottom:16}}
+      />
+
+      {sellers.length>0 && !seller && (
+
+        <div className="customer-results" style={{position:"static"}}>
+
+          {sellers.map((s:any)=>(
+
+            <div
+              key={s.id}
+              className="customer-option"
+              onClick={()=>openSeller(s.id)}
+            >
+              <b>{s.name}</b>
+              <br/>
+              <small>{s.email}</small>
+              <br/>
+              <small>Shop: {s.shopName || "N/A"} · {s.productCount} products · {s.currentPackageName || "No package"}</small>
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
+      {loading && <div className="loading-screen">Loading...</div>}
+
+      {seller && (
+
+        <>
+
+          <div className="panel" style={{padding:"14px",marginBottom:16}}>
+
+            <b>{seller.name}</b> — {seller.email}
+            <br/>
+            <small>Shop: {seller.shopName || "N/A"} · Package: {seller.currentPackageName || "None"} · Limit: {seller.productLimit}</small>
+
+            <div style={{marginTop:10, display:"flex", gap:8}}>
+
+              <button className="table-btn" onClick={()=>{setSeller(null);setItems([]);}}>
+                ← Back to search
+              </button>
+
+              <button className="table-btn danger-btn" onClick={removeAll} disabled={items.length===0}>
+                Remove All ({items.length})
+              </button>
+
+            </div>
+
+          </div>
+
+          <div className="table-wrap">
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Added</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {items.length===0 ? (
+                  <tr><td colSpan={4}>No products in this seller's store.</td></tr>
+                ) : (
+
+                  items.map((item:any)=>(
+
+                    <tr key={item.id}>
+                      <td>
+                        <div className="order-product-cell">
+                          <img className="table-thumb" src={item.product?.image} alt={item.product?.name} />
+                          <div><b>{item.product?.name}</b></div>
+                        </div>
+                      </td>
+                      <td>${Number(item.product?.price||0).toLocaleString()}</td>
+                      <td><small>{item.addedDate ? new Date(item.addedDate).toLocaleDateString() : "-"}</small></td>
+                      <td>
+                        <button className="table-btn danger-btn" onClick={()=>removeOne(item.id)}>
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+
+                  ))
+
+                )}
+
+              </tbody>
+            </table>
+
+          </div>
+
+        </>
+
+      )}
+
+    </section>
 
   );
 

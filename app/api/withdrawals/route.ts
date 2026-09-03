@@ -7,6 +7,8 @@ import {
   userFromRequest
 } from "../../lib/server";
 
+import { addSystemMessage, addNotification } from "../../lib/notifications";
+
 export const runtime = "nodejs";
 
 
@@ -407,6 +409,10 @@ export async function PATCH(req: Request){
     String(body.action || "");
 
 
+  const adminMessage =
+    String(body.message || "").trim();
+
+
   if(
     action !== "approved" &&
     action !== "rejected"
@@ -482,6 +488,21 @@ export async function PATCH(req: Request){
     action === "rejected"
   ){
 
+    if(!adminMessage){
+
+      return NextResponse.json(
+        {
+          error:
+            "Please enter a rejection reason."
+        },
+        {
+          status:400
+        }
+      );
+
+    }
+
+
     request.status =
       "Rejected";
 
@@ -490,6 +511,32 @@ export async function PATCH(req: Request){
 
     request.processedBy =
       admin.id;
+
+    request.adminMessage =
+      adminMessage;
+
+
+    const rejectedCustomer =
+      (db.users || []).find(
+        (u:any) =>
+          u.id === request.userId
+      );
+
+    if(rejectedCustomer){
+
+      addSystemMessage(
+        db,
+        rejectedCustomer.id,
+        `Your withdrawal request has been rejected. Reason: ${adminMessage}`
+      );
+
+      addNotification(db, rejectedCustomer.id, {
+        title: "❌ Withdrawal Request Rejected",
+        message: `Your withdrawal of $${Number(request.amount || 0).toFixed(2)} (${request.type || "Wallet"}) was rejected. Reason: ${adminMessage || "Details not provided."}`,
+        type: "withdrawal"
+      });
+
+    }
 
 
     writeDB(db);
@@ -652,6 +699,24 @@ export async function PATCH(req: Request){
   request.processedBy =
     admin.id;
 
+
+  request.adminMessage =
+    adminMessage ||
+    "Your withdrawal request has been successfully approved.";
+
+
+  addSystemMessage(
+    db,
+    customer.id,
+    request.adminMessage
+  );
+
+  addNotification(db, customer.id, {
+    title: "✅ Withdrawal Approved!",
+    message: `Your withdrawal of $${amount.toFixed(2)} (${request.type || "Wallet Balance"}) has been approved and processed!`,
+    type: "withdrawal",
+    metadata: { withdrawalId: request.id, amount }
+  });
 
   writeDB(db);
 

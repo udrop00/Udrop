@@ -15,7 +15,7 @@ export async function sendVerificationEmail(
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: email,
-    subject: "Drop Zone Email Verification Code",
-    text: `Your Drop Zone verification code is: ${code}. This code will expire soon.`,
+    subject: "Ubuy Email Verification Code",
+    text: `Your Ubuy verification code is: ${code}. This code will expire soon.`,
   });
 }

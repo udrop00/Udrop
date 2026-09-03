@@ -58,7 +58,7 @@ export default function Orders(){
 
       setError(
         d.error ||
-        "Unable to grab order"
+        "Unable to pick up order"
       );
 
       return;
@@ -204,14 +204,14 @@ export default function Orders(){
                       grab(o.id)
                     }
                   >
-                    Grab Order
+                    Pick Up Order
                   </button>
 
                 </div>
 
 
                 <small className="hint">
-                  Once you grab this order,
+                  Once you pick up this order,
                   it will move to Pending.
                   Orders cannot be cancelled
                   by the seller.

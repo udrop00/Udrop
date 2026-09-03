@@ -77,11 +77,11 @@
       "walletBalance": 0,
       "pendingBalance": 0,
       "guaranteeMoney": 100,
-      "sellerRating": 4.7,
+      "sellerRating": 2.5,
       "role": "customer",
       "status": "Active",
       "createdAt": "2026-08-26T07:01:20.787Z",
-      "balance": 6500.0599999999995,
+      "balance": 7500.0599999999995,
       "profit": 3500.06,
       "packageStatus": "active",
       "currentPackageName": "Diamond"
@@ -415,32 +415,32 @@
       "userId": "fe6bc383-99fd-47c6-934a-80c84321f531",
       "expiresAt": 1790910626204
     },
-    "6ba6093609280c6f96ebad5d6d9747fd5e31c997a85be51f98a75eb1a388e399": {
-      "userId": "admin-001",
-      "expiresAt": 1790939975777
+    "3e74ba3bae67ce0b4ce2d9d10a7a124cfd3de5bdcf8dd497c08c656588d2af76": {
+      "userId": "5ceb8635-05b9-405b-b219-b75f60a9421f",
+      "expiresAt": 1790911293909
     }
   },
   "activity": [
     {
-      "id": "d8bd8cfe-bf71-4d7e-866f-970d5e210543",
+      "id": "a84042bc-471a-4443-b38b-4ac66e89c066",
+      "userId": "admin-001",
+      "action": "SELLER_RATING_UPDATED",
+      "description": "tester2@gmail.com rating updated to 2.5",
+      "createdAt": "2026-09-03T16:17:06.079Z"
+    },
+    {
+      "id": "96bdf63d-fc8a-4fc2-98d9-6c7cee038b5c",
+      "userId": "admin-001",
+      "action": "INVITE_REVOKED",
+      "description": "Invitation revoked",
+      "createdAt": "2026-09-03T14:50:53.504Z"
+    },
+    {
+      "id": "b29a2919-068b-4bf9-9a4f-2a3359952a52",
       "userId": "admin-001",
       "action": "INVITE_CREATED",
       "description": "Invitation created; expires in 7 day(s)",
-      "createdAt": "2026-09-02T11:19:58.909Z"
-    },
-    {
-      "id": "54961028-2e31-4b01-b6ff-879c514f2afb",
-      "userId": "admin-001",
-      "action": "LOGIN",
-      "description": "Successful login",
-      "createdAt": "2026-09-02T11:19:35.769Z"
-    },
-    {
-      "id": "71a58704-a9d3-4f68-a1fc-66ca06889584",
-      "userId": "5ceb8635-05b9-405b-b219-b75f60a9421f",
-      "action": "LOGOUT",
-      "description": "Logged out",
-      "createdAt": "2026-09-02T08:33:11.793Z"
+      "createdAt": "2026-09-03T14:50:49.762Z"
     },
     {
       "id": "294ce666-e2c3-47d8-a798-eba3a293adcc",
@@ -1603,9 +1603,7 @@
       "senderId": "system",
       "text": "Your order Executive Office Desk status has been updated to handed over.",
       "createdAt": "2026-08-31T12:39:03.149Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "e4a47acc-cf9d-4fee-b794-137810f8c33a",
@@ -1613,9 +1611,7 @@
       "senderId": "system",
       "text": "Your order Executive Office Desk status has been updated to on the_way.",
       "createdAt": "2026-08-31T12:39:04.443Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "8f184d30-be67-43b6-b5d6-839879da2397",
@@ -1623,9 +1619,7 @@
       "senderId": "system",
       "text": "Your order Executive Office Desk status has been updated to delivered.",
       "createdAt": "2026-08-31T12:39:05.611Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "f081aec2-cff5-4863-8945-a33284364104",
@@ -1633,9 +1627,7 @@
       "senderId": "system",
       "text": "Your order Executive Office Desk is completed. $799.00 order amount and $111.86 commission have been added to your Total Balance. Your Total Profit is now $111.86.",
       "createdAt": "2026-08-31T12:39:07.040Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "22d00db5-ac8a-48e2-9ccc-54357e456944",
@@ -1651,9 +1643,7 @@
       "senderId": "system",
       "text": "A new order is available: Power Bank 30,000mAh. Order Amount: $55.00. Commission: $16.50 (30%).",
       "createdAt": "2026-08-31T13:30:32.697Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "b956e95a-c73e-4e92-8690-049d0cd32c5a",
@@ -1661,9 +1651,7 @@
       "senderId": "system",
       "text": "A new order is available: Premium Espresso Coffee Machine. Order Amount: $1085.00. Commission: $325.50 (30%).",
       "createdAt": "2026-08-31T13:38:15.188Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "e8eb7784-3a5e-49e7-8912-7561430e2eee",
@@ -1671,9 +1659,7 @@
       "senderId": "system",
       "text": "A new order is available: Smart Office Management Device. Order Amount: $1980.00. Commission: $594.00 (30%).",
       "createdAt": "2026-08-31T13:38:21.960Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "bfb067de-27e2-4b55-8767-7a11473c4688",
@@ -1681,9 +1667,7 @@
       "senderId": "system",
       "text": "A new order is available: Stainless Steel Water Bottle. Order Amount: $100.00. Commission: $30.00 (30%).",
       "createdAt": "2026-08-31T13:39:34.787Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "437dcfa9-1101-4a08-ae58-3b2f65477311",
@@ -1691,9 +1675,7 @@
       "senderId": "system",
       "text": "A new order is available: Professional Video Production Camera Kit. Order Amount: $3075.00. Commission: $922.50 (30%).",
       "createdAt": "2026-08-31T13:39:41.379Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "273e38dc-0dd5-4852-8240-5cdf92edecb9",
@@ -1701,9 +1683,7 @@
       "senderId": "system",
       "text": "A new order is available: Ultimate Professional Production System. Order Amount: $4999.00. Commission: $1499.70 (30%).",
       "createdAt": "2026-08-31T13:39:48.891Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "68344c0c-2e9f-4822-9810-08ab823e019f",
@@ -1711,9 +1691,7 @@
       "senderId": "system",
       "text": "Your order Professional Video Production Camera Kit has been grabbed. $3075.00 has been deducted from your Total Balance.",
       "createdAt": "2026-08-31T13:40:04.286Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "625f5ed2-4a2a-46c5-b29c-d850de18fa38",
@@ -1721,9 +1699,7 @@
       "senderId": "system",
       "text": "Your order Stainless Steel Water Bottle has been grabbed. $100.00 has been deducted from your Total Balance.",
       "createdAt": "2026-08-31T13:40:06.056Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "4ac73e3a-b4e9-4069-a4d6-e0bd7f78c129",
@@ -1731,9 +1707,7 @@
       "senderId": "system",
       "text": "Your order Power Bank 30,000mAh has been grabbed. $55.00 has been deducted from your Total Balance.",
       "createdAt": "2026-08-31T13:40:10.337Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "c065c61e-e0a8-4441-a618-2b1c5e160031",
@@ -1741,9 +1715,7 @@
       "senderId": "system",
       "text": "Your order Professional Video Production Camera Kit status has been updated to handed over.",
       "createdAt": "2026-08-31T13:40:20.532Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "c7b812ee-7bb7-4878-9fb3-cc575ed6ccdb",
@@ -1751,9 +1723,7 @@
       "senderId": "system",
       "text": "Your order Stainless Steel Water Bottle status has been updated to handed over.",
       "createdAt": "2026-08-31T13:40:20.537Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "a6d5945b-b15d-42b4-a7ab-6f204a4672ee",
@@ -1761,9 +1731,7 @@
       "senderId": "system",
       "text": "Your order Professional Video Production Camera Kit status has been updated to on the_way.",
       "createdAt": "2026-08-31T13:40:23.327Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "274d0a89-d550-4c15-96d6-006656abbd28",
@@ -1771,9 +1739,7 @@
       "senderId": "system",
       "text": "Your order Professional Video Production Camera Kit status has been updated to delivered.",
       "createdAt": "2026-08-31T13:40:25.388Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "cb59b62f-f9c2-4ccb-a9aa-3f95e292db06",
@@ -1781,9 +1747,7 @@
       "senderId": "system",
       "text": "Your order Professional Video Production Camera Kit is completed. $3075.00 order amount and $922.50 commission have been added to your Total Balance. Your Total Profit is now $1034.36.",
       "createdAt": "2026-08-31T13:40:26.196Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "0d7ff059-2a46-49e7-9de8-d673c0029400",
@@ -1791,9 +1755,7 @@
       "senderId": "system",
       "text": "Your order Stainless Steel Water Bottle status has been updated to on the_way.",
       "createdAt": "2026-08-31T13:40:27.153Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "8b1d6dd0-a4be-4784-96e7-3169270a11d2",
@@ -1801,9 +1763,7 @@
       "senderId": "system",
       "text": "Your order Stainless Steel Water Bottle status has been updated to delivered.",
       "createdAt": "2026-08-31T13:40:28.267Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "9d7cdb8e-5ab2-4457-a42a-4d1200e223d5",
@@ -1811,9 +1771,7 @@
       "senderId": "system",
       "text": "Your order Stainless Steel Water Bottle is completed. $100.00 order amount and $30.00 commission have been added to your Total Balance. Your Total Profit is now $1064.36.",
       "createdAt": "2026-08-31T13:40:28.897Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "59234b77-2825-485d-b0a5-eaa8292b2af8",
@@ -1821,9 +1779,7 @@
       "senderId": "system",
       "text": "Your order Power Bank 30,000mAh status has been updated to handed over.",
       "createdAt": "2026-08-31T13:40:30.173Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "3528dc2a-97d8-466c-b018-9a431008b86b",
@@ -1831,9 +1787,7 @@
       "senderId": "system",
       "text": "Your order Power Bank 30,000mAh status has been updated to on the_way.",
       "createdAt": "2026-08-31T13:40:32.012Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "287dda48-ab8a-41ad-952f-a9c1d553824e",
@@ -1841,9 +1795,7 @@
       "senderId": "system",
       "text": "Your order Power Bank 30,000mAh status has been updated to delivered.",
       "createdAt": "2026-08-31T13:40:32.684Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "52c216ea-a06d-48f8-bdf3-795eed1e0673",
@@ -1851,9 +1803,7 @@
       "senderId": "system",
       "text": "Your order Power Bank 30,000mAh is completed. $55.00 order amount and $16.50 commission have been added to your Total Balance. Your Total Profit is now $1080.86.",
       "createdAt": "2026-08-31T13:40:33.375Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "c94f47bf-27fc-4974-ae5d-010d7984f216",
@@ -1861,9 +1811,7 @@
       "senderId": "system",
       "text": "Your order Ultimate Professional Production System has been grabbed. $4999.00 has been deducted from your Total Balance.",
       "createdAt": "2026-09-01T11:26:41.918Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "0bcc6d24-4e58-4e42-b077-af739d190084",
@@ -1871,9 +1819,7 @@
       "senderId": "system",
       "text": "Your order Ultimate Professional Production System status has been updated to handed over.",
       "createdAt": "2026-09-01T11:27:20.213Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "7e29bccd-076b-4893-a21d-2b25cfd33284",
@@ -1881,9 +1827,7 @@
       "senderId": "system",
       "text": "Your order Ultimate Professional Production System status has been updated to on the_way.",
       "createdAt": "2026-09-01T11:27:22.431Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "50bb2969-70fb-47a8-a501-73b55eb44680",
@@ -1891,9 +1835,7 @@
       "senderId": "system",
       "text": "Your order Ultimate Professional Production System status has been updated to delivered.",
       "createdAt": "2026-09-01T11:27:23.724Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "349214ee-715b-4c0d-82c1-968334c780fc",
@@ -1901,9 +1843,7 @@
       "senderId": "system",
       "text": "Your order Ultimate Professional Production System is completed. $4999.00 order amount and $1499.70 commission have been added to your Total Balance. Your Total Profit is now $2580.56.",
       "createdAt": "2026-09-01T11:27:24.620Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "1365cf11-5c19-4725-9203-bff98c775146",
@@ -1911,9 +1851,7 @@
       "senderId": "system",
       "text": "Your order Smart Office Management Device has been grabbed. $1980.00 has been deducted from your Total Balance.",
       "createdAt": "2026-09-01T13:32:02.232Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "4e91afc0-0fcc-4380-958c-8801bdb04d8e",
@@ -1921,9 +1859,7 @@
       "senderId": "system",
       "text": "Your order Premium Espresso Coffee Machine has been grabbed. $1085.00 has been deducted from your Total Balance.",
       "createdAt": "2026-09-01T13:32:03.546Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "6b4431c0-c295-4fe1-aa26-b7d60de866be",
@@ -1931,9 +1867,7 @@
       "senderId": "system",
       "text": "Your order Smart Office Management Device status has been updated to handed over.",
       "createdAt": "2026-09-01T13:32:20.803Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "583ca9bb-3339-4bf9-a505-429f7a30a3a5",
@@ -1941,9 +1875,7 @@
       "senderId": "system",
       "text": "Your order Smart Office Management Device status has been updated to on the_way.",
       "createdAt": "2026-09-01T13:32:22.848Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "1134735d-8f75-4129-b668-e8407c8c3d40",
@@ -1951,9 +1883,7 @@
       "senderId": "system",
       "text": "Your order Premium Espresso Coffee Machine status has been updated to handed over.",
       "createdAt": "2026-09-01T13:32:25.131Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "3bd0db68-60f9-41a3-ba29-c9aaefd554f2",
@@ -1961,9 +1891,7 @@
       "senderId": "system",
       "text": "Your order Smart Office Management Device status has been updated to delivered.",
       "createdAt": "2026-09-01T13:32:25.574Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "6056eaf1-982d-437a-8266-0093856de3fd",
@@ -1971,9 +1899,7 @@
       "senderId": "system",
       "text": "Your order Premium Espresso Coffee Machine status has been updated to on the_way.",
       "createdAt": "2026-09-01T13:32:27.190Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "1ffc9ba1-0ec8-4ffa-a8d7-937e78ec7d72",
@@ -1981,9 +1907,7 @@
       "senderId": "system",
       "text": "Your order Smart Office Management Device is completed. $1980.00 order amount and $594.00 commission have been added to your Total Balance. Your Total Profit is now $3174.56.",
       "createdAt": "2026-09-01T13:32:27.891Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "11d45450-3d48-4be3-ae78-f241b6ae1eb9",
@@ -1991,9 +1915,7 @@
       "senderId": "system",
       "text": "Your order Premium Espresso Coffee Machine status has been updated to delivered.",
       "createdAt": "2026-09-01T13:32:28.634Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "cab7559b-16c9-426e-95da-4215aab5c8e0",
@@ -2001,9 +1923,7 @@
       "senderId": "system",
       "text": "Your order Premium Espresso Coffee Machine is completed. $1085.00 order amount and $325.50 commission have been added to your Total Balance. Your Total Profit is now $3500.06.",
       "createdAt": "2026-09-01T13:32:29.280Z",
-      "readBy": [
-        "admin-001"
-      ]
+      "readBy": []
     },
     {
       "id": "7d9062b6-7058-4a3a-b8c1-aaa71ae66ce0",
@@ -7220,11 +7140,12 @@
   ],
   "invites": [
     {
-      "id": "2c0fdcb4-7db2-4d18-8891-9b1ff08211b6",
-      "token": "_sESIpdO-Nwdlh6U67-Oe2Pr",
+      "id": "589ff96a-9c15-4e50-8d63-56c622172877",
+      "token": "T2_73k7sfCPy6wWq0AQhC1I1",
       "createdBy": "admin-001",
-      "createdAt": "2026-09-02T11:19:58.904Z",
-      "expiresAt": 1788952798904
+      "createdAt": "2026-09-03T14:50:49.757Z",
+      "expiresAt": 1789051849759,
+      "revokedAt": "2026-09-03T14:50:53.504Z"
     },
     {
       "id": "2665a932-4f17-4323-8fa9-e0eff7d6b811",
@@ -13153,34 +13074,6 @@
   ],
   "withdrawals": [
     {
-      "id": "c57d2086-9e3c-4e73-af5b-4645a3f717d8",
-      "userId": "fe6bc383-99fd-47c6-934a-80c84321f531",
-      "customerName": "tester2",
-      "email": "tester2@gmail.com",
-      "amount": 1000,
-      "withdrawType": "Wallet Balance",
-      "accountDetails": "frtuyighm",
-      "message": "ftyu7ikoghjk",
-      "status": "Approved",
-      "createdAt": "2026-09-02T08:37:23.219Z",
-      "processedAt": "2026-09-02T08:37:56.142Z",
-      "processedBy": "admin-001"
-    },
-    {
-      "id": "eab7474a-8cfe-474b-97cf-4e53cebd9606",
-      "userId": "fe6bc383-99fd-47c6-934a-80c84321f531",
-      "customerName": "tester2",
-      "email": "tester2@gmail.com",
-      "amount": 5000,
-      "withdrawType": "Wallet Balance",
-      "accountDetails": "ftgyuik",
-      "message": "dtyj",
-      "status": "Rejected",
-      "createdAt": "2026-09-02T07:17:05.035Z",
-      "processedAt": "2026-09-02T08:36:55.400Z",
-      "processedBy": "admin-001"
-    },
-    {
       "id": "5d600d0d-89d9-4986-a859-791634cac718",
       "userId": "fe6bc383-99fd-47c6-934a-80c84321f531",
       "customerName": "tester2",
@@ -13250,5 +13143,6 @@
       "processedAt": "2026-08-28T18:58:08.183Z",
       "processedBy": "admin-001"
     }
-  ]
+  ],
+  "notifications": []
 }

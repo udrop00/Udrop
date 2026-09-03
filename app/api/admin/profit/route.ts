@@ -1,8 +1,23 @@
-import {NextResponse} from "next/server";
-import {userFromRequest} from "../../../lib/server";
-export const runtime="nodejs";
+import {NextResponse} from 'next/server';
+import {readDB,writeDB,userFromRequest,logActivity} from '../../../lib/server';
+import {addSystemMessage} from '../../../lib/notifications';
+export const runtime='nodejs';
 export async function PATCH(req:Request){
   const admin=userFromRequest(req);
-  if(!admin||admin.role!=="admin")return NextResponse.json({error:"Forbidden"},{status:403});
-  return NextResponse.json({error:"Manual profit adjustments are disabled. Total Profit is earned from completed order commissions only."},{status:410});
+  if(!admin||admin.role!=='admin')return NextResponse.json({error:'Forbidden'},{status:403});
+  const {userId,amount,mode}=await req.json();
+  const db=readDB();
+  const u=db.users.find((x:any)=>x.id===String(userId)&&x.role==='customer');
+  const n=Math.round(Number(amount)*100)/100;
+  if(!u||!Number.isFinite(n)||n<=0)return NextResponse.json({error:'Invalid profit adjustment amount'},{status:400});
+
+  const currentProfit=Math.round(Number(u.profit||0)*100)/100;
+  let newProfit=mode==='deduct'?(currentProfit-n):(currentProfit+n);
+  if(newProfit<0)newProfit=0;
+  u.profit=Math.round(newProfit*100)/100;
+
+  logActivity(db,admin.id,mode==='deduct'?'PROFIT_DEDUCTED':'PROFIT_ADDED',`${mode==='deduct'?'Deducted':'Added'} $${n.toFixed(2)} profit for ${u.email}`);
+  addSystemMessage(db,u.id,mode==='deduct'?`Your Total Profit has been reduced by $${n.toFixed(2)}. Your current profit is $${u.profit.toFixed(2)}.`:`Your Total Profit has been updated with a $${n.toFixed(2)} adjustment. Your current profit is $${u.profit.toFixed(2)}.`);
+  writeDB(db);
+  return NextResponse.json({user:{id:u.id,profit:u.profit}});
 }

@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 import crypto from 'node:crypto';
 import {readDB,writeDB,userFromRequest,logActivity} from '../../../lib/server';
 
-import {addSystemMessage} from '../../../lib/notifications';
+import {addSystemMessage, addNotification} from '../../../lib/notifications';
 export const runtime='nodejs';
 export async function GET(req:Request){const admin=userFromRequest(req);if(!admin||admin.role!=='admin')return NextResponse.json({error:'Forbidden'},{status:403});const db=readDB();return NextResponse.json({orders:db.orders||[],users:db.users.map((u:any)=>({
 id:u.id,
@@ -11,6 +11,7 @@ email:u.email,
 shopName:u.shopName || "",
 balance:Number(u.balance||0),
 profit:Number(u.profit||0),
+guaranteeMoney:Number(u.guaranteeMoney||0),
 status:u.status,
 role:u.role,
 currentPackage: u.currentPackage || u.currentPackageName || "",
@@ -35,8 +36,8 @@ export async function POST(req:Request){
     body.customerId || ""
   );
 
-  const productId = Number(
-    body.productId
+  const productId = String(
+    body.productId || ""
   );
 
 
@@ -52,7 +53,7 @@ export async function POST(req:Request){
 
   const product = (db.products || []).find(
   (p:any)=>
-    Number(p.id) === productId
+    String(p.id) === productId
 );
 
 
@@ -67,6 +68,21 @@ export async function POST(req:Request){
       }
     );
 
+  }
+
+  const inStore = (db.sellerProducts || []).some(
+    (sp:any) => sp.sellerId === customerId && String(sp.productId) === productId
+  );
+
+  if(!inStore){
+    return NextResponse.json(
+      {
+        error:"This product is not in the seller's store. The seller must add it to their store first."
+      },
+      {
+        status:400
+      }
+    );
   }
 
 
@@ -163,7 +179,12 @@ export async function POST(req:Request){
     `A new order is available: ${product.name}. Order Amount: $${orderAmount.toFixed(2)}. Commission: $${commission.toFixed(2)} (${commissionPercent}%).`
   );
 
-
+  addNotification(db, customer.id, {
+    title: "📦 New Order Received!",
+    message: `You received a new order for "${product.name}" ($${orderAmount.toFixed(2)}). Commission: $${commission.toFixed(2)} (${commissionPercent}%). Go to Available Orders to pick it up!`,
+    type: "order",
+    metadata: { orderId: order.id }
+  });
 
   writeDB(db);
 

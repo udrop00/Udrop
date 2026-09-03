@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readDB, writeDB, userFromRequest, logActivity } from "../../../lib/server";
+import { addNotification } from "../../../lib/notifications";
 import crypto from "node:crypto";
 
 export const runtime = "nodejs";
@@ -215,6 +216,12 @@ export async function PATCH(req:Request){
       `Approved KYC for ${user.email}`
     );
 
+    addNotification(db, user.id, {
+      title: "🛡️ KYC Verification Approved!",
+      message: `Congratulations! Your KYC seller verification has been approved. Your account is now active with ${user.currentPackageName || "Silver"} Package.`,
+      type: "kyc"
+    });
+
 }
 
 
@@ -229,6 +236,12 @@ export async function PATCH(req:Request){
       "KYC_REJECTED",
       `Rejected KYC for ${user.email}`
     );
+
+    addNotification(db, user.id, {
+      title: "⚠️ KYC Verification Rejected",
+      message: `Your KYC verification request was rejected by admin. Please contact support or resubmit documents.`,
+      type: "kyc"
+    });
 
   }
 

@@ -34,7 +34,7 @@ export default function OrderStatus() {
 
       {orders.length === 0 ? (
         <section className="panel empty-state">
-          Grabbed orders will appear here as Pending.
+          Picked up orders will appear here as Pending.
         </section>
       ) : (
         <div className="status-list">

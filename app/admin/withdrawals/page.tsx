@@ -16,6 +16,15 @@ export default function AdminWithdrawals(){
   const [error,setError] =
     useState("");
 
+  const [actionTarget,setActionTarget] =
+    useState<{id:string; action:"approved"|"rejected"} | null>(null);
+
+  const [actionMessage,setActionMessage] =
+    useState("");
+
+  const [processing,setProcessing] =
+    useState(false);
+
 
   const loadRequests = useCallback(async()=>{
     try{
@@ -46,16 +55,53 @@ export default function AdminWithdrawals(){
   });
 
 
-  const handleAction = async(
+  const openActionModal = (
     id:string,
     action:"approved" | "rejected"
   )=>{
 
-    
+    setActionTarget({ id, action });
+
+    setActionMessage(
+      action === "approved"
+        ? "Your withdrawal request has been successfully approved."
+        : ""
+    );
+
+    setError("");
+
+  };
+
+
+  const closeActionModal = ()=>{
+    setActionTarget(null);
+    setActionMessage("");
+  };
+
+
+  const confirmAction = async()=>{
+
+    if(!actionTarget) return;
+
+
+    if(
+      actionTarget.action === "rejected" &&
+      !actionMessage.trim()
+    ){
+
+      setError(
+        "Please enter a rejection reason."
+      );
+
+      return;
+
+    }
+
 
     try{
 
       setError("");
+      setProcessing(true);
 
 
       const r = await apiFetch(
@@ -70,8 +116,9 @@ export default function AdminWithdrawals(){
           },
 
           body:JSON.stringify({
-            id,
-            action
+            id: actionTarget.id,
+            action: actionTarget.action,
+            message: actionMessage.trim()
           })
 
         }
@@ -93,6 +140,8 @@ export default function AdminWithdrawals(){
       }
 
 
+      closeActionModal();
+
       await loadRequests();
 
 
@@ -101,6 +150,10 @@ export default function AdminWithdrawals(){
       setError(
         "Something went wrong while processing the request."
       );
+
+    }finally{
+
+      setProcessing(false);
 
     }
 
@@ -318,7 +371,7 @@ export default function AdminWithdrawals(){
                               type="button"
                               className="btn"
                               onClick={()=>
-                                handleAction(
+                                openActionModal(
                                   request.id,
                                   "approved"
                                 )
@@ -332,7 +385,7 @@ export default function AdminWithdrawals(){
                               type="button"
                               className="table-btn danger-btn"
                               onClick={()=>
-                                handleAction(
+                                openActionModal(
                                   request.id,
                                   "rejected"
                                 )
@@ -368,6 +421,122 @@ export default function AdminWithdrawals(){
         )}
 
       </section>
+
+
+      {actionTarget && (
+
+        <div
+          style={{
+            position:"fixed",
+            inset:0,
+            zIndex:99999,
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"center",
+            background:"rgba(0,0,0,0.75)",
+            padding:"20px"
+          }}
+          onClick={closeActionModal}
+        >
+
+          <div
+            style={{
+              width:"100%",
+              maxWidth:"480px",
+              background:"#101522",
+              border:"1px solid rgba(255,255,255,0.15)",
+              borderRadius:"18px",
+              padding:"28px",
+              boxShadow:"0 25px 80px rgba(0,0,0,0.5)"
+            }}
+            onClick={(e)=>e.stopPropagation()}
+          >
+
+            <span className="eyebrow">
+              {actionTarget.action === "approved"
+                ? "Approve Withdrawal"
+                : "Reject Withdrawal"}
+            </span>
+
+            <h2 style={{marginTop:"6px"}}>
+              {actionTarget.action === "approved"
+                ? "Confirm approval"
+                : "Provide a rejection reason"}
+            </h2>
+
+            <p className="hint" style={{marginTop:"6px"}}>
+              {actionTarget.action === "approved"
+                ? "This message will be sent to the seller. You can edit it if you'd like to add a custom note."
+                : "This reason will be sent to the seller explaining why the request was rejected."}
+            </p>
+
+            {error && (
+
+              <div
+                className="form-error"
+                style={{marginTop:"12px"}}
+              >
+                {error}
+              </div>
+
+            )}
+
+            <label style={{display:"block", marginTop:"14px"}}>
+
+              Message to seller
+
+              <textarea
+                rows={4}
+                value={actionMessage}
+                onChange={e=>setActionMessage(e.target.value)}
+                placeholder={
+                  actionTarget.action === "rejected"
+                    ? "Enter the reason for rejection..."
+                    : "Optional custom message..."
+                }
+              />
+
+            </label>
+
+            <div
+              className="order-actions"
+              style={{marginTop:"20px"}}
+            >
+
+              <button
+                type="button"
+                className="table-btn"
+                onClick={closeActionModal}
+                disabled={processing}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className={
+                  actionTarget.action === "rejected"
+                    ? "table-btn danger-btn"
+                    : "btn"
+                }
+                onClick={confirmAction}
+                disabled={processing}
+              >
+                {processing
+                  ? "Processing..."
+                  : actionTarget.action === "approved"
+                    ? "Confirm Approve"
+                    : "Confirm Reject"
+                }
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
     </AdminShell>
 

@@ -167,7 +167,7 @@ export default function Users() {
             </span>
 
             <h2>
-              Customer Accounts
+              Seller Accounts
             </h2>
 
           </div>
@@ -276,7 +276,7 @@ export default function Users() {
                   <td>
 
                     <span className="status active">
-                      {u.role}
+                      {u.role === "customer" ? "Seller" : u.role === "admin" ? "Admin" : u.role}
                     </span>
 
                   </td>
@@ -325,6 +325,19 @@ export default function Users() {
                         >
                           Manage
                         </Link>
+
+
+                        <button
+                          className="table-btn"
+                          onClick={() =>
+                            window.open(
+                              `/admin/impersonate?userId=${u.id}`,
+                              "_blank"
+                            )
+                          }
+                        >
+                          Login as Seller
+                        </button>
 
 
                         <button

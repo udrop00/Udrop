@@ -195,7 +195,7 @@ return (
 <div>
 
 <span className="eyebrow">
-DROP ZONE INTELLIGENCE
+UBUY INTELLIGENCE
 </span>
 
 
@@ -781,7 +781,7 @@ Copy Link
 
 
 
-<div className="table-wrap">
+<div className="table-wrap" style={{maxHeight:"420px",overflowY:"auto"}}>
 
 
 <table>
@@ -819,7 +819,7 @@ Action
 <tbody>
 
 
-{invites.slice(0,6).map((i:any)=>(
+{invites.map((i:any)=>(
 
 
 <tr key={i.id}>
@@ -841,9 +841,9 @@ Action
 <td>
 
 
-<span className="status active">
+<span className={`status ${i.revoked ? "suspended" : "active"}`}>
 
-{i.used ? "Used" : "Available"}
+{i.used ? "Used" : i.revoked ? "Revoked" : "Available"}
 
 </span>
 
@@ -865,7 +865,7 @@ Action
 <td>
 
 
-{!i.used && (
+{!i.used && !i.revoked && (
 
 <button
 

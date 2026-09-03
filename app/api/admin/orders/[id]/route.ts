@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {readDB,writeDB,userFromRequest,logActivity} from "../../../../lib/server";
-import {addSystemMessage} from "../../../../lib/notifications";
+import {addSystemMessage,addNotification} from "../../../../lib/notifications";
 export const runtime="nodejs";
 const transitions:Record<string,string>={pending:"handed_over",handed_over:"on_the_way",on_the_way:"delivered",delivered:"completed"};
 export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){
@@ -15,11 +15,24 @@ export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){
    customer.profit=Number(customer.profit||0)+Number(o.commission);
    o.status="completed"; o.completedAt=new Date().toISOString();
    addSystemMessage(db,customer.id,`Your order ${o.productName} is completed. $${Number(o.orderAmount).toFixed(2)} order amount and $${Number(o.commission).toFixed(2)} commission have been added to your Total Balance. Your Total Profit is now $${Number(customer.profit).toFixed(2)}.`);
+   addNotification(db, customer.id, {
+     title: "🎉 Order Completed!",
+     message: `Order for "${o.productName}" is completed! $${Number(o.orderAmount).toFixed(2)} + $${Number(o.commission).toFixed(2)} commission (${o.commissionPercent}%) returned to your wallet balance. Total Profit: $${Number(customer.profit).toFixed(2)}`,
+     type: "order",
+     metadata: { orderId: o.id }
+   });
    logActivity(db,admin.id,"ORDER_COMPLETED",`Completed ${o.productName}; returned $${Number(o.orderAmount).toFixed(2)} + $${Number(o.commission).toFixed(2)} commission`);
    writeDB(db); return NextResponse.json({order:o,customer:{balance:customer.balance,profit:customer.profit}});
  }
  o.status=status; o.statusUpdatedAt=new Date().toISOString();
- addSystemMessage(db,o.customerId,`Your order ${o.productName} status has been updated to ${status.replace("_"," ")}.`);
+ const readableStatus = status.replace(/_/g," ").toUpperCase();
+ addSystemMessage(db,o.customerId,`Your order ${o.productName} status has been updated to ${readableStatus}.`);
+ addNotification(db, o.customerId, {
+   title: "🚚 Order Status Updated",
+   message: `Order for "${o.productName}" status changed to: ${readableStatus}`,
+   type: "order",
+   metadata: { orderId: o.id }
+ });
  logActivity(db,admin.id,"ORDER_STATUS_UPDATED",`Changed ${o.productName} status to ${status}`);
  writeDB(db); return NextResponse.json({order:o});
 }

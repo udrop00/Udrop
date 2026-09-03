@@ -15,6 +15,35 @@ export default function MyStore(){
   const [selectedProduct,setSelectedProduct] = useState<any|null>(null);
 
 
+  const [autoAdding,setAutoAdding] = useState(false);
+  const [msg,setMsg] = useState("");
+
+  const autoAddProducts = async () => {
+    if (autoAdding) return;
+    setAutoAdding(true);
+    setMsg("");
+
+    try {
+      const r = await apiFetch("/api/seller-products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autoAdd: true })
+      });
+      const d = await r.json();
+      if (r.ok) {
+        setMsg(d.message || "Products automatically added to your store!");
+        await load();
+      } else {
+        setMsg(d.error || "Unable to auto-add products.");
+      }
+    } catch {
+      setMsg("Auto-add failed.");
+    } finally {
+      setAutoAdding(false);
+    }
+  };
+
+
   const load = useCallback(async()=>{
     try {
       const [prodRes, meRes] = await Promise.all([
@@ -83,7 +112,7 @@ export default function MyStore(){
 
       <div className="topbar">
 
-        <div>
+        <div style={{width:"100%"}}>
 
           <span className="eyebrow">
             Seller Store
@@ -99,27 +128,52 @@ export default function MyStore(){
           <div
             className="panel"
             style={{
-              marginTop:"20px"
+              marginTop:"20px",
+              display:"flex",
+              justifyContent:"space-between",
+              alignItems:"center",
+              flexWrap:"wrap",
+              gap:"14px"
             }}
           >
 
-            <p>
-              Active Package: {packageName || "No Package"}
-            </p>
+            <div>
+              <p style={{margin:"0 0 6px",fontSize:"14px"}}>
+                Active Package: <strong style={{color:"#38bdf8"}}>{packageName || "No Package"}</strong>
+                {" · "}
+                Products Added: <strong>{products.length} / {limit}</strong>
+                {" · "}
+                Remaining Slots: <strong style={{color: products.length >= limit ? "#ef4444" : "#10b981"}}>{Math.max(limit-products.length,0)}</strong>
+              </p>
+            </div>
 
+            <div style={{display:"flex",gap:"10px",alignItems:"center"}}>
+              <button
+                className="btn btn-small"
+                style={{
+                  background: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
+                  border: "1px solid rgba(56, 189, 248, 0.4)",
+                  fontWeight: 700
+                }}
+                disabled={autoAdding || products.length >= limit || limit === 0}
+                onClick={autoAddProducts}
+              >
+                {autoAdding ? "⚡ Auto Adding..." : "⚡ Auto Add Products"}
+              </button>
 
-            <p>
-              Products Added: {products.length} / {limit}
-            </p>
-
-
-            <p>
-              Remaining Slots: {Math.max(limit-products.length,0)}
-            </p>
-
+              <a
+                href="/products"
+                className="btn btn-small btn-ghost"
+              >
+                + Add Single Products
+              </a>
+            </div>
 
           </div>
 
+          {msg && (
+            <div className="info-banner" style={{marginTop:"12px"}}>{msg}</div>
+          )}
 
         </div>
 
@@ -412,8 +466,18 @@ export default function MyStore(){
 
             <div
               className="order-actions"
-              style={{marginTop:"20px"}}
+              style={{marginTop:"20px",display:"flex",gap:"10px"}}
             >
+              <button
+                className="table-btn danger-btn"
+                onClick={()=>{
+                  removeProduct(selectedProduct.id);
+                  setSelectedProduct(null);
+                }}
+              >
+                Remove From Store
+              </button>
+
               <button
                 className="table-btn"
                 onClick={()=>setSelectedProduct(null)}

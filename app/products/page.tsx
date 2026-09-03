@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { UserShell } from "../components";
 import { apiFetch, apiMe } from "../lib";
 
@@ -10,6 +10,14 @@ export default function Products() {
 
   const [products,setProducts] = useState<any[]>([]);
   const [q,setQ] = useState("");
+
+  const [storeProductIds,setStoreProductIds] = useState<Set<string>>(new Set());
+  const [limit,setLimit] = useState(0);
+  const [packageStatus,setPackageStatus] = useState("");
+  const [packageName,setPackageName] = useState("");
+  const [addingId,setAddingId] = useState("");
+  const [autoAdding,setAutoAdding] = useState(false);
+  const [message,setMessage] = useState("");
 
 
 
@@ -37,6 +45,81 @@ const productsData = await productsRes.json();
   };
 
 
+  const loadStore = useCallback(async()=>{
+
+    try {
+      const [meRes, storeRes] = await Promise.all([
+        apiMe(),
+        apiFetch("/api/seller-products", { cache:"no-store" })
+      ]);
+
+      const user = meRes?.user;
+      setLimit(Number(user?.productLimit || 0));
+      setPackageStatus(user?.packageStatus || "");
+      setPackageName(user?.currentPackageName || user?.currentPackage || "");
+
+      const d = await storeRes.json();
+      setStoreProductIds(new Set((d.products || []).map((it:any)=>String(it.productId))));
+    } catch {}
+
+  }, []);
+
+
+  const addToStore = async(productId:any)=>{
+
+    if(addingId) return;
+
+    setAddingId(String(productId));
+    setMessage("");
+
+    const r = await apiFetch(
+      "/api/seller-products",
+      {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ productId })
+      }
+    );
+
+    const d = await r.json();
+
+    if(!r.ok){
+      setMessage(d.error || "Unable to add product to your store.");
+      setAddingId("");
+      return;
+    }
+
+    setStoreProductIds(prev => new Set(prev).add(String(productId)));
+    setAddingId("");
+
+  };
+
+
+  const autoAddProducts = async()=>{
+    if(autoAdding) return;
+    setAutoAdding(true);
+    setMessage("");
+
+    try {
+      const r = await apiFetch("/api/seller-products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autoAdd: true })
+      });
+      const d = await r.json();
+      if (r.ok) {
+        setMessage(d.message || "Products automatically added to your store!");
+        await loadStore();
+      } else {
+        setMessage(d.error || "Unable to auto-add products.");
+      }
+    } catch {
+      setMessage("Auto-add failed.");
+    } finally {
+      setAutoAdding(false);
+    }
+  };
+
 
 
  useEffect(()=>{
@@ -44,9 +127,10 @@ const productsData = await productsRes.json();
   
 
   loadProducts();
+  loadStore();
 
 
-},[]);
+},[loadStore]);
 
 
 
@@ -90,7 +174,7 @@ const productsData = await productsRes.json();
 
 
           <h1>
-            Products Store
+            All Products
           </h1>
 
         </div>
@@ -106,6 +190,49 @@ const productsData = await productsRes.json();
 
 
       </div>
+
+
+      <div className="panel" style={{marginBottom:"20px",padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"12px"}}>
+        <div>
+          <p style={{margin:0,fontSize:"14px"}}>
+            Active Package: <strong style={{color:"#38bdf8"}}>{packageName || "No Active Package"}</strong>
+            {" · "}
+            Products in Store: <strong>{storeProductIds.size} / {limit}</strong>
+            {" · "}
+            Remaining Slots: <strong style={{color: storeProductIds.size >= limit ? "#ef4444" : "#10b981"}}>{Math.max(limit - storeProductIds.size, 0)}</strong>
+          </p>
+        </div>
+
+        <div style={{display:"flex",gap:"10px",alignItems:"center"}}>
+          <button
+            className="btn btn-small"
+            style={{
+              background: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              fontWeight: 700
+            }}
+            disabled={
+              packageStatus !== "active" ||
+              autoAdding ||
+              storeProductIds.size >= limit
+            }
+            onClick={autoAddProducts}
+          >
+            {autoAdding ? "⚡ Auto Adding..." : "⚡ Auto Add Products"}
+          </button>
+
+          <Link
+            href="/my-store"
+            className="btn btn-small btn-ghost"
+          >
+            View My Store →
+          </Link>
+        </div>
+      </div>
+
+      {message && (
+        <div className="info-banner">{message}</div>
+      )}
 
 
 
@@ -179,7 +306,42 @@ const productsData = await productsRes.json();
 
 
 
-           
+          {
+            storeProductIds.has(String(p.id)) ? (
+
+              <button
+                className="btn btn-small btn-ghost"
+                style={{width:"100%",marginTop:"10px"}}
+                disabled
+              >
+                ✓ In My Store
+              </button>
+
+            ) : (
+
+              <button
+                className="btn btn-small"
+                style={{width:"100%",marginTop:"10px"}}
+                disabled={
+                  packageStatus !== "active" ||
+                  addingId === String(p.id) ||
+                  storeProductIds.size >= limit
+                }
+                onClick={()=>addToStore(p.id)}
+              >
+                {
+                  packageStatus !== "active"
+                    ? "No Active Package"
+                    : storeProductIds.size >= limit
+                    ? "Limit Reached"
+                    : addingId === String(p.id)
+                    ? "Adding..."
+                    : "+ Add to My Store"
+                }
+              </button>
+
+            )
+          }
 
 
           </div>

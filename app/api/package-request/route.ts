@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readDB, writeDB, userFromRequest } from "../../lib/server";
+import { addNotification } from "../../lib/notifications";
 import crypto from "node:crypto";
 
 export const runtime = "nodejs";
@@ -491,6 +492,12 @@ export async function PATCH(req: Request) {
     request.reviewedBy =
       admin.id || "admin";
 
+    addNotification(db, customer.id, {
+      title: `🎁 ${pkg.name} Package Activated!`,
+      message: `Your upgrade request for ${pkg.name} Package has been approved! Product Limit: ${newProductLimit}, Commission Rate: ${pkg.commission}%.`,
+      type: "package"
+    });
+
   }
 
 
@@ -508,6 +515,12 @@ export async function PATCH(req: Request) {
 
     request.reviewedBy =
       admin.id || "admin";
+
+    addNotification(db, customer.id, {
+      title: `❌ Package Request Rejected`,
+      message: `Your package request for ${pkg?.name || "selected package"} was rejected by admin.`,
+      type: "package"
+    });
 
 
     if (

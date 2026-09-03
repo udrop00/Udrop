@@ -102,7 +102,7 @@ else{
 
 
         <p>
-          Sign in to your Drop Zone workspace.
+          Sign in to your Ubuy workspace.
         </p>
 
 
@@ -217,7 +217,7 @@ else{
 
         <p className="switch">
 
-          New to Drop Zone?{" "}
+          New to Ubuy?{" "}
 
           <Link href="/register">
             Create an account
