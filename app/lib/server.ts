@@ -8,11 +8,68 @@ type Conversation = { id:string; customerId:string; status:"open"|"closed"; upda
 type Invite = { id:string; token:string; createdBy:string; createdAt:string; expiresAt:number; usedAt?:string; usedBy?:string; revokedAt?:string };
 type DB = { users:User[]; sessions:Record<string,{userId:string;expiresAt:number}>; activity:{id:string;userId:string;action:string;description:string;createdAt:string}[]; conversations:Conversation[]; messages:Message[]; invites:Invite[]; products:any[]; orders:any[]; packages:any[]; packageRequests:any[]; withdrawals:any[]; [key:string]:any };
 const file=path.join(process.cwd(),"data","db.json");
-function ensure(){if(!fs.existsSync(file)){fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify({users:[],sessions:{},activity:[],conversations:[],messages:[],invites:[],packages:[],packageRequests:[],withdrawals:[],sellerProducts:[],notifications:[]},null,2));}}
+const seedFile=path.join(process.cwd(),"data","seed.json");
+function ensure(){
+  if(!fs.existsSync(file)){
+    fs.mkdirSync(path.dirname(file),{recursive:true});
+    if(fs.existsSync(seedFile)){
+      fs.copyFileSync(seedFile,file);
+    } else {
+      fs.writeFileSync(file,JSON.stringify({users:[],sessions:{},activity:[],conversations:[],messages:[],invites:[],packages:[],packageRequests:[],withdrawals:[],sellerProducts:[],notifications:[],products:[]},null,2));
+    }
+  }
+}
 let globalDBRevision = Date.now();
 export function getDBRevision(){ return globalDBRevision; }
 export function touchDBRevision(){ globalDBRevision = Date.now(); }
-export function readDB():DB{ensure();const db=JSON.parse(fs.readFileSync(file,"utf8")); if(!db.invites) db.invites=[]; if(!db.products) db.products=[]; if(!db.orders) db.orders=[]; if(!db.conversations) db.conversations=[]; if(!db.messages) db.messages=[]; if(!db.packages) db.packages=[]; if(!db.packageRequests) db.packageRequests=[]; if(!db.withdrawals) db.withdrawals=[]; if(!db.sellerProducts) db.sellerProducts=[]; if(!db.notifications) db.notifications=[]; for(const m of db.messages){if(!Array.isArray(m.readBy))m.readBy=[];} return db;}
+export function readDB():DB{
+  ensure();
+  let db:DB=JSON.parse(fs.readFileSync(file,"utf8"));
+  if(!db.users) db.users=[];
+  if(!db.invites) db.invites=[];
+  if(!db.products) db.products=[];
+  if(!db.orders) db.orders=[];
+  if(!db.conversations) db.conversations=[];
+  if(!db.messages) db.messages=[];
+  if(!db.packages) db.packages=[];
+  if(!db.packageRequests) db.packageRequests=[];
+  if(!db.withdrawals) db.withdrawals=[];
+  if(!db.sellerProducts) db.sellerProducts=[];
+  if(!db.notifications) db.notifications=[];
+
+  // If products are missing on volume, load from seed
+  if(db.products.length===0 && fs.existsSync(seedFile)){
+    try{
+      const seedData = JSON.parse(fs.readFileSync(seedFile,"utf8"));
+      if(Array.isArray(seedData.products) && seedData.products.length>0){
+        db.products = seedData.products;
+        if(db.packages.length===0 && Array.isArray(seedData.packages)) db.packages = seedData.packages;
+        writeDB(db);
+      }
+    }catch{}
+  }
+
+  // Ensure Admin exists
+  let admin = db.users.find((u:any)=>u.role==="admin");
+  if(!admin){
+    const {salt,hash} = hashPassword("admin@ubuy");
+    admin = {
+      id:"admin-001",
+      name:"Drop Zone Admin",
+      email:"admin@dropzone.com",
+      passwordHash:hash,
+      salt:salt,
+      role:"admin",
+      status:"Active",
+      createdAt:new Date().toISOString()
+    };
+    db.users.unshift(admin);
+    writeDB(db);
+  }
+
+  for(const m of db.messages){if(!Array.isArray(m.readBy))m.readBy=[];}
+  return db;
+}
 export function writeDB(db:DB){fs.writeFileSync(file,JSON.stringify(db,null,2)); globalDBRevision = Date.now();}
 export function hashPassword(password:string,salt?:string){const s=salt||crypto.randomBytes(16).toString("hex");return {salt:s,hash:crypto.scryptSync(password,Buffer.from(s,"hex"),64).toString("hex")};}
 export function verifyPassword(password:string,user:User){const hash=crypto.scryptSync(password,Buffer.from(user.salt,"hex"),64).toString("hex");return crypto.timingSafeEqual(Buffer.from(hash,"hex"),Buffer.from(user.passwordHash,"hex"));}
