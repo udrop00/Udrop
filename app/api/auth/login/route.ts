@@ -20,6 +20,13 @@ export async function POST(req: Request) {
     const db = readDB();
     if (!db.users) db.users = [];
 
+    const isAdminAttempt =
+      input === "admin" ||
+      input === "admin@dropzone.com" ||
+      input === "admin@ubuy" ||
+      input === "admin@ubuy.com" ||
+      input === "admin@admin.com";
+
     // 1. ADMIN LOGIN
     if (isAdminAttempt) {
       let admin: any = db.users.find((u: any) => u.role === "admin");
