@@ -13,13 +13,13 @@ return (
 <a
 href="/"
 className="brand"
+style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "2px" }}
 >
 
-<img
-src="/dropzone-logo.png"
-alt="Ubuy"
-className="sidebar-logo"
-/>
+<span style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.5px" }}>
+  <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
+  <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 16px rgba(251, 191, 36, 0.6)" }}>drop</span>
+</span>
 
 </a>
 

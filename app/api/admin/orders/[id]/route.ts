@@ -36,3 +36,27 @@ export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){
  logActivity(db,admin.id,"ORDER_STATUS_UPDATED",`Changed ${o.productName} status to ${status}`);
  writeDB(db); return NextResponse.json({order:o});
 }
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const admin = userFromRequest(req);
+  if (!admin || admin.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id } = await params;
+  const db = readDB();
+  const index = (db.orders || []).findIndex((x: any) => x.id === id);
+  if (index === -1) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+
+  const o = db.orders[index];
+  if (o.status !== "pending") {
+    return NextResponse.json(
+      { error: "Only pending orders that have not been picked or processed can be deleted." },
+      { status: 400 }
+    );
+  }
+
+  db.orders.splice(index, 1);
+  logActivity(db, admin.id, "ORDER_DELETED", `Deleted pending order #${o.id.slice(0, 8)} (${o.productName})`);
+  writeDB(db);
+
+  return NextResponse.json({ success: true, message: "Order successfully deleted." });
+}

@@ -20,7 +20,10 @@ export default function Home() {
     <main className="landing">
       <nav className="nav container">
         <Link href="/" className="brand" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src="/dropzone-logo.png" alt="Ubuy" style={{ height: "46px", objectFit: "contain" }} />
+          <span style={{ fontSize: "28px", fontWeight: 900, letterSpacing: "-0.5px" }}>
+            <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
+            <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 16px rgba(251, 191, 36, 0.6)" }}>drop</span>
+          </span>
         </Link>
         <div className="nav-links">
           <Link href="/login">Login</Link>
@@ -31,7 +34,11 @@ export default function Home() {
       <section className="hero container">
         <div className="hero-copy">
           <div className="eyebrow"><span className="dot" /> Dropshipping workspace</div>
-          <h1>Ubuy Workspace.<br /><span>We handle it all.</span></h1>
+          <h1>
+            <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
+            <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 20px rgba(251, 191, 36, 0.6)" }}>drop</span> Platform.<br />
+            <span>We handle it all.</span>
+          </h1>
           <p>One clean workspace for your seller account, orders, balance, support and customer communication.</p>
           <div className="hero-actions">
             <Link className="btn" href="/register">Create Account</Link>
@@ -46,7 +53,10 @@ export default function Home() {
         <div className="hero-card">
           <div className="glow" />
           <div className="mock-top">
-            <span style={{ fontWeight: 800 }}>Ubuy Platform</span>
+            <span style={{ fontWeight: 800 }}>
+              <span style={{ color: "#ffffff" }}>U</span>
+              <span style={{ color: "#fbbf24" }}>drop</span> Platform
+            </span>
             <span className="status-pill">● Live workspace</span>
           </div>
           <div className="mock-stat-grid">
@@ -70,7 +80,7 @@ export default function Home() {
           <div className="mock-message">
             <span className="avatar">U</span>
             <div>
-              <b>Ubuy Support</b>
+              <b>Udrop Support</b>
               <p>Need help with your seller account?</p>
             </div>
             <span className="unread">1</span>
@@ -82,7 +92,7 @@ export default function Home() {
         <div className="section-head">
           <span className="eyebrow">Everything in one place</span>
           <h2>Simple tools. Clear account control.</h2>
-          <p>Manage your store, products, orders, profit and balance from one streamlined Ubuy workspace.</p>
+          <p>Manage your store, products, orders, profit and balance from one streamlined Udrop workspace.</p>
         </div>
         <div className="feature-grid">
           <article>
@@ -106,7 +116,7 @@ export default function Home() {
       <section className="cta container">
         <div>
           <span className="eyebrow">Stay connected</span>
-          <h2>Get Ubuy updates.</h2>
+          <h2>Get Udrop updates.</h2>
         </div>
         {sent ? (
           <div className="success-box">✓ You’re on the update list.</div>
@@ -119,10 +129,13 @@ export default function Home() {
       </section>
 
       <footer className="footer container">
-        <Link href="/" className="brand">
-          <img src="/dropzone-logo.png" alt="Ubuy" style={{ height: "38px", objectFit: "contain" }} />
+        <Link href="/" className="brand" style={{ textDecoration: "none" }}>
+          <span style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px" }}>
+            <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
+            <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 16px rgba(251, 191, 36, 0.6)" }}>drop</span>
+          </span>
         </Link>
-        <span>Ubuy workspace © {new Date().getFullYear()}</span>
+        <span>Udrop workspace © {new Date().getFullYear()}</span>
       </footer>
     </main>
   );

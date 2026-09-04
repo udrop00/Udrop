@@ -185,14 +185,17 @@ router.push("/kyc-pending");
 
       <section className="auth-card">
 
-        <div className="auth-icon" style={{ background: "transparent", width: "auto", height: "auto", display: "flex", alignItems: "center", marginBottom: "20px", boxShadow: "none" }}>
-          <img src="/dropzone-logo.png" alt="Ubuy" style={{ height: "55px", width: "auto", objectFit: "contain" }} />
+        <div className="auth-icon" style={{ background: "transparent", width: "auto", height: "auto", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px", boxShadow: "none" }}>
+          <span style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-0.5px" }}>
+            <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
+            <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 20px rgba(251, 191, 36, 0.7)" }}>drop</span>
+          </span>
         </div>
 
         <h1>Create account</h1>
 
         <p>
-          Start your private Ubuy workspace.
+          Start your private Udrop workspace.
         </p>
 
 

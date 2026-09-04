@@ -41,6 +41,52 @@ const [invites,setInvites]=useState<any[]>([]);
 const [inviteUrl,setInviteUrl]=useState("");
 const [inviteError,setInviteError]=useState("");
 
+const [currentPassword, setCurrentPassword] = useState("");
+const [newPassword, setNewPassword] = useState("");
+const [confirmPassword, setConfirmPassword] = useState("");
+const [pwdMessage, setPwdMessage] = useState("");
+const [pwdError, setPwdError] = useState("");
+const [pwdLoading, setPwdLoading] = useState(false);
+
+const changeAdminPassword = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setPwdMessage("");
+  setPwdError("");
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    setPwdError("All password fields are required.");
+    return;
+  }
+  if (newPassword.length < 6) {
+    setPwdError("New password must be at least 6 characters.");
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    setPwdError("New password and confirm password do not match.");
+    return;
+  }
+  setPwdLoading(true);
+  try {
+    const res = await apiFetch("/api/profile/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+    });
+    const d = await res.json();
+    if (!res.ok) {
+      setPwdError(d.error || "Password update failed.");
+    } else {
+      setPwdMessage("✓ Admin password has been successfully updated!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  } catch {
+    setPwdError("Failed to update password.");
+  } finally {
+    setPwdLoading(false);
+  }
+};
+
 
 const load = useCallback(()=>{
 
@@ -1102,11 +1148,72 @@ ${Number(u.balance||0).toFixed(2)}
 
 </section>
 
+<section className="panel" style={{ marginTop: "24px" }}>
+  <div className="panel-head">
+    <div>
+      <span className="eyebrow">Security & Credentials</span>
+      <h2>Change Admin Password</h2>
+    </div>
+  </div>
 
+  {pwdMessage && (
+    <div className="info-banner" style={{ borderLeft: "4px solid #10b981", color: "#10b981", background: "rgba(16, 185, 129, 0.1)" }}>
+      <b>Success:</b> {pwdMessage}
+    </div>
+  )}
 
+  {pwdError && (
+    <div className="form-error" style={{ marginBottom: "16px" }}>
+      {pwdError}
+    </div>
+  )}
 
+  <form onSubmit={changeAdminPassword} style={{ maxWidth: "540px", display: "flex", flexDirection: "column", gap: "16px" }}>
+    <label>
+      Current / Old Password
+      <input
+        type="password"
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
+        placeholder="Enter current password"
+        required
+      />
+    </label>
 
+    <label>
+      New Password (min. 6 characters)
+      <input
+        type="password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        placeholder="Enter new password"
+        required
+      />
+    </label>
 
+    <label>
+      Confirm New Password
+      <input
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="Confirm new password"
+        required
+      />
+    </label>
+
+    <div style={{ marginTop: "8px" }}>
+      <button
+        type="submit"
+        className="btn"
+        disabled={pwdLoading}
+        style={{ minWidth: "160px" }}
+      >
+        {pwdLoading ? "Updating..." : "Update Password"}
+      </button>
+    </div>
+  </form>
+</section>
 
 </AdminShell>
 

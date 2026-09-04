@@ -63,6 +63,25 @@ load();
 
 };
 
+const deleteOrder = async (id: string) => {
+  if (!window.confirm("Are you sure you want to delete this pending order?")) return;
+  setMessage("");
+  try {
+    const r = await apiFetch(`/api/admin/orders/${id}`, {
+      method: "DELETE"
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      setMessage(d.error || "Could not delete order");
+      return;
+    }
+    setMessage("✓ Pending order successfully deleted.");
+    load();
+  } catch {
+    setMessage("Failed to delete order");
+  }
+};
+
 
 const nextStatus=(status:string)=>{
 
@@ -266,10 +285,26 @@ Update
 }
 </td>
 
-<td>
+<td style={{ display: "flex", gap: "6px", alignItems: "center" }}>
 <button className="table-btn" onClick={()=>setExpandedId(isOpen ? "" : o.id)}>
 {isOpen ? "Hide" : "Details"}
 </button>
+{o.status === "pending" && (
+  <button
+    className="table-btn danger-btn"
+    style={{
+      background: "rgba(239, 68, 68, 0.15)",
+      color: "#ef4444",
+      border: "1px solid rgba(239, 68, 68, 0.4)",
+      cursor: "pointer",
+      fontWeight: 600
+    }}
+    onClick={()=>deleteOrder(o.id)}
+    title="Delete pending order before customer picks it"
+  >
+    🗑️ Delete
+  </button>
+)}
 </td>
 
 </tr>

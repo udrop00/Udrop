@@ -10,6 +10,9 @@ export default function AdminWithdrawals(){
   const [requests,setRequests] =
     useState<any[]>([]);
 
+  const [search, setSearch] =
+    useState("");
+
   const [loading,setLoading] =
     useState(true);
 
@@ -179,6 +182,16 @@ export default function AdminWithdrawals(){
 
         </div>
 
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <input
+            className="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search email, name, account details..."
+            style={{ minWidth: "300px" }}
+          />
+        </div>
+
       </div>
 
 
@@ -210,7 +223,16 @@ export default function AdminWithdrawals(){
 
 
           <strong>
-            {requests.length} Requests
+            {requests.filter((r: any) => {
+              const q = search.toLowerCase();
+              return (
+                (r.customerName || "").toLowerCase().includes(q) ||
+                (r.customerEmail || "").toLowerCase().includes(q) ||
+                (r.accountDetails || "").toLowerCase().includes(q) ||
+                (r.message || "").toLowerCase().includes(q) ||
+                (r.status || "").toLowerCase().includes(q)
+              );
+            }).length} Requests
           </strong>
 
         </div>
@@ -222,10 +244,19 @@ export default function AdminWithdrawals(){
             Loading withdrawal requests...
           </div>
 
-        ) : requests.length === 0 ? (
+        ) : requests.filter((r: any) => {
+          const q = search.toLowerCase();
+          return (
+            (r.customerName || "").toLowerCase().includes(q) ||
+            (r.customerEmail || "").toLowerCase().includes(q) ||
+            (r.accountDetails || "").toLowerCase().includes(q) ||
+            (r.message || "").toLowerCase().includes(q) ||
+            (r.status || "").toLowerCase().includes(q)
+          );
+        }).length === 0 ? (
 
           <div className="empty-state">
-            No withdrawal requests yet.
+            {search ? "No matching withdrawal requests found." : "No withdrawal requests yet."}
           </div>
 
         ) : (
@@ -277,7 +308,16 @@ export default function AdminWithdrawals(){
 
               <tbody>
 
-                {requests.map(
+                {requests.filter((r: any) => {
+                  const q = search.toLowerCase();
+                  return (
+                    (r.customerName || "").toLowerCase().includes(q) ||
+                    (r.customerEmail || "").toLowerCase().includes(q) ||
+                    (r.accountDetails || "").toLowerCase().includes(q) ||
+                    (r.message || "").toLowerCase().includes(q) ||
+                    (r.status || "").toLowerCase().includes(q)
+                  );
+                }).map(
                   (request:any)=>(
 
                     <tr key={request.id}>

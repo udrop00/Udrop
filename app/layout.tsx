@@ -3,8 +3,8 @@ import "./globals.css";
 import SalesmartlyWidget from "./salesmartly-widget";
 
 export const metadata: Metadata = {
-  title: "Ubuy",
-  description: "Ubuy seller and admin dashboard"
+  title: "Udrop",
+  description: "Udrop seller and admin platform"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

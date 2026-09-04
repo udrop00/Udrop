@@ -138,81 +138,13 @@ export async function PATCH(req:Request){
 
 
     if(silverPackage){
-
       user.currentPackage = silverPackage.id;
-
       user.currentPackageName = silverPackage.name;
-
       user.packageStatus = "active";
-
-      user.productLimit = Number(
-        silverPackage.productLimit || 100
-      );
-
-      user.commissionRate = Number(
-        silverPackage.commission || 20
-      );
-
+      user.productLimit = Number(silverPackage.productLimit || 100);
+      user.commissionRate = Number(silverPackage.commission || 20);
       user.packageExpiry = null;
-
-
-      if(!db.sellerProducts){
-        db.sellerProducts=[];
-      }
-
-
-      const existingProducts =
-        db.sellerProducts.filter(
-          (p:any)=>p.sellerId===user.id
-        );
-
-
-      const needed =
-        user.productLimit - existingProducts.length;
-
-
-      if(needed > 0){
-
-        const availableProducts =
-          (db.products || []).filter(
-            (product:any)=>
-              !existingProducts.some(
-                (sp:any)=>
-                  sp.productId===product.id
-              )
-          );
-
-
-        const selected =
-          availableProducts
-          .sort(()=>Math.random()-0.5)
-          .slice(0,needed);
-
-
-        selected.forEach(
-          (product:any)=>{
-
-            db.sellerProducts.push({
-
-              id: crypto.randomUUID(),
-
-              sellerId:user.id,
-
-              productId:product.id,
-
-              addedDate:new Date().toISOString(),
-
-              status:"active"
-
-            });
-
-          }
-        );
-
-      }
-
     }
-
 
     logActivity(
       db,

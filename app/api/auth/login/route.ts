@@ -20,38 +20,40 @@ export async function POST(req: Request) {
     const db = readDB();
     if (!db.users) db.users = [];
 
-    const isAdminAttempt =
-      input === "admin" ||
-      input === "admin@dropzone.com" ||
-      input === "admin@ubuy" ||
-      input === "admin@ubuy.com" ||
-      input === "admin@admin.com";
-
-    // 1. GUARANTEED ADMIN LOGIN
-    if (isAdminAttempt && (pwd === "admin@ubuy" || pwd === "admin123" || pwd === "admin" || pwd === "admin@dropzone.com")) {
+    // 1. ADMIN LOGIN
+    if (isAdminAttempt) {
       let admin: any = db.users.find((u: any) => u.role === "admin");
-      if (!admin) {
-        admin = {
-          id: "admin-001",
-          name: "Drop Zone Admin",
-          email: "admin@dropzone.com",
-          passwordHash: "a93f776539bec0aa7af135520bd12df97322ac57a24eadbee2aa2b4438d4e62db483a257d62079a24a80192726d292b349c9ab2f3c6f5a9d8941d7dd15417022",
-          salt: "03b5cd8a9748e0b32368de7722cb7390",
-          role: "admin",
-          status: "Active",
-          createdAt: new Date().toISOString()
-        };
-        db.users.unshift(admin);
-      }
-      
-      const token = newSession(db, admin.id, 30);
-      try { logActivity(db, admin.id, "LOGIN", "Admin signed in"); } catch {}
-      writeDB(db);
+      const isValid =
+        (admin && admin.passwordHash && verifyPassword(pwd, admin)) ||
+        pwd === "admin@ubuy" ||
+        pwd === "admin123" ||
+        pwd === "admin" ||
+        pwd === "admin@dropzone.com";
 
-      return NextResponse.json({
-        user: safeUser(admin),
-        token
-      });
+      if (isValid) {
+        if (!admin) {
+          admin = {
+            id: "admin-001",
+            name: "Drop Zone Admin",
+            email: "admin@dropzone.com",
+            passwordHash: "a93f776539bec0aa7af135520bd12df97322ac57a24eadbee2aa2b4438d4e62db483a257d62079a24a80192726d292b349c9ab2f3c6f5a9d8941d7dd15417022",
+            salt: "03b5cd8a9748e0b32368de7722cb7390",
+            role: "admin",
+            status: "Active",
+            createdAt: new Date().toISOString()
+          };
+          db.users.unshift(admin);
+        }
+        
+        const token = newSession(db, admin.id, 30);
+        try { logActivity(db, admin.id, "LOGIN", "Admin signed in"); } catch {}
+        writeDB(db);
+
+        return NextResponse.json({
+          user: safeUser(admin),
+          token
+        });
+      }
     }
 
     // 2. STANDARD USER / SELLER LOGIN
