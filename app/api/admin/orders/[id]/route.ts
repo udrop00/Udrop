@@ -47,15 +47,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (index === -1) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
   const o = db.orders[index];
-  if (o.status !== "pending") {
+  if (o.status !== "sent") {
     return NextResponse.json(
-      { error: "Only pending orders that have not been picked or processed can be deleted." },
+      { error: "Order has already been picked up by the customer and cannot be deleted." },
       { status: 400 }
     );
   }
 
   db.orders.splice(index, 1);
-  logActivity(db, admin.id, "ORDER_DELETED", `Deleted pending order #${o.id.slice(0, 8)} (${o.productName})`);
+  logActivity(db, admin.id, "ORDER_DELETED", `Deleted unpicked order #${o.id.slice(0, 8)} (${o.productName})`);
   writeDB(db);
 
   return NextResponse.json({ success: true, message: "Order successfully deleted." });

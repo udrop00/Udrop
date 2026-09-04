@@ -13,13 +13,14 @@ return (
 <a
 href="/"
 className="brand"
-style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "2px" }}
+style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
 >
 
-<span style={{ fontSize: "24px", fontWeight: 900, letterSpacing: "-0.5px" }}>
-  <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
-  <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 16px rgba(251, 191, 36, 0.6)" }}>drop</span>
-</span>
+<img
+src="/dropzone-logo.png"
+alt="Udrop"
+style={{ height: "36px", width: "auto", objectFit: "contain" }}
+/>
 
 </a>
 
@@ -576,7 +577,7 @@ return (
 <aside className="sidebar">
 
 
-<div className="side-brand">
+<div className="side-brand" style={{ paddingLeft: "60px", paddingBottom: "20px", display: "flex", alignItems: "center", minHeight: "44px" }}>
 
 <Logo/>
 
@@ -587,7 +588,7 @@ return (
 
 
 <div className="side-label">
-CUSTOMER AREA
+SELLER AREA
 </div>
 
 
@@ -975,7 +976,7 @@ return (
 
 
 
-<div className="side-brand">
+<div className="side-brand" style={{ paddingLeft: "60px", paddingBottom: "20px", display: "flex", alignItems: "center", minHeight: "44px" }}>
 
 <Logo/>
 

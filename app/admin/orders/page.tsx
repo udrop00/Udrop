@@ -289,7 +289,7 @@ Update
 <button className="table-btn" onClick={()=>setExpandedId(isOpen ? "" : o.id)}>
 {isOpen ? "Hide" : "Details"}
 </button>
-{o.status === "pending" && (
+{o.status === "sent" && (
   <button
     className="table-btn danger-btn"
     style={{
@@ -300,7 +300,7 @@ Update
       fontWeight: 600
     }}
     onClick={()=>deleteOrder(o.id)}
-    title="Delete pending order before customer picks it"
+    title="Delete order before customer picks it up"
   >
     🗑️ Delete
   </button>
