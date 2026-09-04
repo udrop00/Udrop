@@ -51,35 +51,38 @@ export default function Dashboard(){
   });
 
 
-  // Store Views — starts at a realistic active number and
-  // keeps fluctuating live to show the store is active.
+  // Store Views — starts at realistic number and fluctuates live within admin configured min & max bounds
   useEffect(()=>{
 
+    const min = Number(data?.user?.viewsMin ?? 600);
+    const max = Number(data?.user?.viewsMax ?? 3200);
+    const safeMin = Math.max(0, Math.min(min, max));
+    const safeMax = Math.max(safeMin + 5, Math.max(min, max));
+
     const initial =
-      Math.floor(Math.random()*(3200-600+1))+600;
+      Math.floor(Math.random() * (safeMax - safeMin + 1)) + safeMin;
 
     setStoreViews(initial);
-
 
     const interval = setInterval(()=>{
 
       setStoreViews(prev=>{
 
+        const step = Math.max(2, Math.floor((safeMax - safeMin) * 0.03));
         const delta =
-          Math.floor(Math.random()*61)-30;
+          Math.floor(Math.random() * (step * 2 + 1)) - step;
 
-        const next = prev + delta;
+        const next = (prev || initial) + delta;
 
-        return Math.min(5000, Math.max(1, next));
+        return Math.min(safeMax, Math.max(safeMin, next));
 
       });
 
     }, 3500);
 
-
     return ()=>clearInterval(interval);
 
-  },[]);
+  },[data?.user?.viewsMin, data?.user?.viewsMax]);
 
 
 

@@ -25,6 +25,10 @@ export default function UserDetail(){
   const [sellerRating,setSellerRating]=useState("0");
   const [savingRating,setSavingRating]=useState(false);
 
+  const [viewsMin,setViewsMin]=useState("600");
+  const [viewsMax,setViewsMax]=useState("3200");
+  const [savingViews,setSavingViews]=useState(false);
+
   const [adjust,setAdjust]=useState("");
   const [adjustTarget,setAdjustTarget]=useState<"balance"|"profit">("balance");
   const [adjusting,setAdjusting]=useState(false);
@@ -41,6 +45,8 @@ export default function UserDetail(){
         setOrders(d.orders || []);
         setGuaranteeMoney(String(Number(d.user?.guaranteeMoney || 0)));
         setSellerRating(String(Number(d.user?.sellerRating || 0)));
+        setViewsMin(String(Number(d.user?.viewsMin ?? 600)));
+        setViewsMax(String(Number(d.user?.viewsMax ?? 3200)));
       }
     } catch {} finally {
       setLoading(false);
@@ -231,6 +237,53 @@ else{
 
 
 
+  };
+
+  const saveViewsRange = async () => {
+    setMessage("");
+
+    const min = parseInt(viewsMin, 10);
+    const max = parseInt(viewsMax, 10);
+
+    if (!Number.isFinite(min) || min < 0) {
+      setMessage("Please enter a valid Min Views value (0 or greater).");
+      return;
+    }
+
+    if (!Number.isFinite(max) || max < min) {
+      setMessage("Max Views must be greater than or equal to Min Views.");
+      return;
+    }
+
+    setSavingViews(true);
+
+    try {
+      const r = await apiFetch(`/api/admin/users/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          viewsMin: min,
+          viewsMax: max
+        })
+      });
+
+      const d = await r.json();
+
+      if (r.ok) {
+        setUser(d.user);
+        setViewsMin(String(Number(d.user?.viewsMin ?? min)));
+        setViewsMax(String(Number(d.user?.viewsMax ?? max)));
+        setMessage("Store Views limit updated successfully.");
+      } else {
+        setMessage(d.error || "Unable to update Store Views limit.");
+      }
+    } catch {
+      setMessage("Unable to update Store Views limit.");
+    } finally {
+      setSavingViews(false);
+    }
   };
 
 
@@ -613,6 +666,22 @@ else{
 
         </div>
 
+        <div className="stat">
+
+          <span>
+            Store Views Limit
+          </span>
+
+          <strong>
+            👁️ {Number(user.viewsMin ?? 600).toLocaleString()} – {Number(user.viewsMax ?? 3200).toLocaleString()}
+          </strong>
+
+          <small>
+            Min – Max Views
+          </small>
+
+        </div>
+
 
 
 
@@ -888,9 +957,65 @@ else{
       </section>
 
 
+      <section className="panel">
 
+        <div className="panel-head">
+          <div>
+            <span className="eyebrow">Store Traffic</span>
+            <h2>Store Views Limit</h2>
+          </div>
+        </div>
 
+        <p>
+          Set the min and max store views limit for this customer.
+          The live store views counter will fluctuate dynamically within this range.
+        </p>
 
+        <div
+          className="adjust-row"
+          style={{
+            maxWidth: "600px",
+            display: "flex",
+            gap: "12px",
+            alignItems: "flex-end",
+            flexWrap: "wrap"
+          }}
+        >
+          <div style={{ flex: 1, minWidth: "120px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>Min Views</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={viewsMin}
+              onChange={e => setViewsMin(e.target.value)}
+              placeholder="Min Views (e.g. 500)"
+            />
+          </div>
+
+          <div style={{ flex: 1, minWidth: "120px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>Max Views</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={viewsMax}
+              onChange={e => setViewsMax(e.target.value)}
+              placeholder="Max Views (e.g. 3500)"
+            />
+          </div>
+
+          <button
+            className="btn"
+            onClick={saveViewsRange}
+            disabled={savingViews}
+            style={{ whiteSpace: "nowrap" }}
+          >
+            {savingViews ? "Saving..." : "Update Views Limit"}
+          </button>
+        </div>
+
+      </section>
 
 
       <section className="panel">

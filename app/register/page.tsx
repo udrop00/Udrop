@@ -22,8 +22,11 @@ export default function Register() {
   const [country, setCountry] = useState("United States");
 
   const [pw, setPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [transactionPassword, setTransactionPassword] = useState("");
+  const [showTxPw, setShowTxPw] = useState(false);
   const [confirmTransactionPassword, setConfirmTransactionPassword] = useState("");
+  const [showConfirmTxPw, setShowConfirmTxPw] = useState(false);
 const [certificateType,setCertificateType] = useState("ID Card");
 const [certificateFront,setCertificateFront] = useState("");
 const [certificateBack,setCertificateBack] = useState("");
@@ -342,14 +345,50 @@ router.push("/kyc-pending");
           <label>
             Password
 
-            <input
-              type="password"
-              value={pw}
-              onChange={(e)=>setPw(e.target.value)}
-              placeholder="At least 6 characters"
-              minLength={6}
-              required
-            />
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <input
+                type={showPw ? "text" : "password"}
+                value={pw}
+                onChange={(e)=>setPw(e.target.value)}
+                placeholder="At least 6 characters"
+                minLength={6}
+                required
+                style={{ width: "100%", paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                title={showPw ? "Hide password" : "Show password"}
+                style={{
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "transparent",
+                  border: "none",
+                  color: showPw ? "#38bdf8" : "#94a3b8",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "6px"
+                }}
+              >
+                {showPw ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+            </div>
 
           </label>
 
@@ -360,21 +399,55 @@ router.push("/kyc-pending");
           <label>
             Transaction Password (6 Digit)
 
-
-            <input
-              type="password"
-              value={transactionPassword}
-              maxLength={6}
-              inputMode="numeric"
-              onChange={(e)=>
-                setTransactionPassword(
-                  e.target.value.replace(/\D/g,"")
-                )
-              }
-              placeholder="Enter 6 digit PIN"
-              required
-            />
-
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <input
+                type={showTxPw ? "text" : "password"}
+                value={transactionPassword}
+                maxLength={6}
+                inputMode="numeric"
+                onChange={(e)=>
+                  setTransactionPassword(
+                    e.target.value.replace(/\D/g,"")
+                  )
+                }
+                placeholder="Enter 6 digit PIN"
+                required
+                style={{ width: "100%", paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowTxPw(!showTxPw)}
+                title={showTxPw ? "Hide PIN" : "Show PIN"}
+                style={{
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "transparent",
+                  border: "none",
+                  color: showTxPw ? "#38bdf8" : "#94a3b8",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "6px"
+                }}
+              >
+                {showTxPw ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+            </div>
 
           </label>
 
@@ -385,21 +458,55 @@ router.push("/kyc-pending");
           <label>
             Confirm Transaction Password
 
-
-            <input
-              type="password"
-              value={confirmTransactionPassword}
-              maxLength={6}
-              inputMode="numeric"
-              onChange={(e)=>
-                setConfirmTransactionPassword(
-                  e.target.value.replace(/\D/g,"")
-                )
-              }
-              placeholder="Confirm 6 digit PIN"
-              required
-            />
-
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <input
+                type={showConfirmTxPw ? "text" : "password"}
+                value={confirmTransactionPassword}
+                maxLength={6}
+                inputMode="numeric"
+                onChange={(e)=>
+                  setConfirmTransactionPassword(
+                    e.target.value.replace(/\D/g,"")
+                  )
+                }
+                placeholder="Confirm 6 digit PIN"
+                required
+                style={{ width: "100%", paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmTxPw(!showConfirmTxPw)}
+                title={showConfirmTxPw ? "Hide PIN" : "Show PIN"}
+                style={{
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "transparent",
+                  border: "none",
+                  color: showConfirmTxPw ? "#38bdf8" : "#94a3b8",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "6px"
+                }}
+              >
+                {showConfirmTxPw ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+            </div>
 
           </label>
 

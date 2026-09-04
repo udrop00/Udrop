@@ -118,6 +118,8 @@ export function safeUser(u:User){
     ),
 guaranteeMoney:Number((u as any).guaranteeMoney||0),
 sellerRating:Number((u as any).sellerRating||0),
+viewsMin:Number((u as any).viewsMin ?? 600),
+viewsMax:Number((u as any).viewsMax ?? 3200),
 
     shopName:(u as any).shopName||"",
 

@@ -147,8 +147,6 @@ export async function PATCH(
 
 
     user.sellerRating = rating;
-console.log("SAVED USER:", user);
-
 
     logActivity(
       db,
@@ -157,6 +155,46 @@ console.log("SAVED USER:", user);
       `${user.email} rating updated to ${rating}`
     );
 
+  }
+
+  if(
+    body.viewsMin !== undefined ||
+    body.viewsMax !== undefined
+  ){
+    const minV = body.viewsMin !== undefined ? Math.max(0, parseInt(body.viewsMin, 10)) : Number(user.viewsMin ?? 600);
+    const maxV = body.viewsMax !== undefined ? Math.max(0, parseInt(body.viewsMax, 10)) : Number(user.viewsMax ?? 3200);
+
+    if(!Number.isFinite(minV) || !Number.isFinite(maxV) || minV < 0 || maxV < 0){
+      return NextResponse.json(
+        {
+          error: "Store views limits must be valid positive numbers."
+        },
+        {
+          status: 400
+        }
+      );
+    }
+
+    if(minV > maxV){
+      return NextResponse.json(
+        {
+          error: "Min views cannot be greater than Max views."
+        },
+        {
+          status: 400
+        }
+      );
+    }
+
+    user.viewsMin = minV;
+    user.viewsMax = maxV;
+
+    logActivity(
+      db,
+      admin.id,
+      "STORE_VIEWS_UPDATED",
+      `${user.email} views range updated to ${minV} - ${maxV}`
+    );
   }
 
   writeDB(db);
