@@ -51,6 +51,26 @@ export async function POST(req: Request) {
           };
           db.users.unshift(admin);
         }
+
+        // Google Authenticator check for Admin
+        if (admin.twoFactorEnabled && admin.twoFactorSecret) {
+          const twoFactorCode = String(body.twoFactorCode || "").trim();
+          if (!twoFactorCode) {
+            return NextResponse.json({
+              requireTwoFactor: true,
+              message: "Enter 6-digit Google Authenticator code"
+            });
+          }
+
+          const { verifyTOTP } = await import("../../../lib/totp");
+          const isTotpValid = verifyTOTP(twoFactorCode, admin.twoFactorSecret);
+          if (!isTotpValid) {
+            return NextResponse.json(
+              { error: "Invalid 6-digit Authenticator code. Please check your Google Authenticator app." },
+              { status: 401 }
+            );
+          }
+        }
         
         const token = newSession(db, admin.id, 30);
         try { logActivity(db, admin.id, "LOGIN", "Admin signed in"); } catch {}

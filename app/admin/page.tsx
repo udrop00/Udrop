@@ -44,9 +44,128 @@ const [inviteError,setInviteError]=useState("");
 const [currentPassword, setCurrentPassword] = useState("");
 const [newPassword, setNewPassword] = useState("");
 const [confirmPassword, setConfirmPassword] = useState("");
+const [pwdTwoFactorCode, setPwdTwoFactorCode] = useState("");
 const [pwdMessage, setPwdMessage] = useState("");
 const [pwdError, setPwdError] = useState("");
 const [pwdLoading, setPwdLoading] = useState(false);
+
+// Google Authenticator (2FA) States
+const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+const [twoFactorSecret, setTwoFactorSecret] = useState("");
+const [twoFactorQR, setTwoFactorQR] = useState("");
+const [twoFactorCode, setTwoFactorCode] = useState("");
+const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+const [twoFactorMessage, setTwoFactorMessage] = useState("");
+const [twoFactorError, setTwoFactorError] = useState("");
+const [showSetup2FA, setShowSetup2FA] = useState(false);
+const [showResetModal, setShowResetModal] = useState(false);
+const [resetPassword, setResetPassword] = useState("");
+const [resetCode, setResetCode] = useState("");
+const [resetLoading, setResetLoading] = useState(false);
+const [resetError, setResetError] = useState("");
+
+const load2FAStatus = useCallback(async () => {
+  try {
+    const res = await apiFetch("/api/admin/2fa", { cache: "no-store" });
+    const d = await res.json();
+    if (res.ok) {
+      setTwoFactorEnabled(Boolean(d.enabled));
+      if (!d.enabled && d.qrCode) {
+        setTwoFactorQR(d.qrCode);
+        setTwoFactorSecret(d.secret);
+      }
+    }
+  } catch {}
+}, []);
+
+const startSetup2FA = async () => {
+  setTwoFactorError("");
+  setTwoFactorMessage("");
+  setTwoFactorLoading(true);
+  try {
+    const res = await apiFetch("/api/admin/2fa", { cache: "no-store" });
+    const d = await res.json();
+    if (res.ok) {
+      setTwoFactorQR(d.qrCode);
+      setTwoFactorSecret(d.secret);
+      setShowSetup2FA(true);
+    } else {
+      setTwoFactorError(d.error || "Unable to load QR Code.");
+    }
+  } catch {
+    setTwoFactorError("Failed to initiate 2FA setup.");
+  } finally {
+    setTwoFactorLoading(false);
+  }
+};
+
+const activate2FA = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setTwoFactorError("");
+  setTwoFactorMessage("");
+
+  if (!twoFactorCode || twoFactorCode.length !== 6) {
+    setTwoFactorError("Please enter a valid 6-digit code from your app.");
+    return;
+  }
+
+  setTwoFactorLoading(true);
+  try {
+    const res = await apiFetch("/api/admin/2fa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: twoFactorCode, secret: twoFactorSecret })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      setTwoFactorEnabled(true);
+      setShowSetup2FA(false);
+      setTwoFactorCode("");
+      setTwoFactorMessage("✓ Google Authenticator (2FA) is now active and protecting your Admin account!");
+    } else {
+      setTwoFactorError(d.error || "Invalid 6-digit code. Please try again.");
+    }
+  } catch {
+    setTwoFactorError("Failed to activate 2FA.");
+  } finally {
+    setTwoFactorLoading(false);
+  }
+};
+
+const handleReset2FA = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setResetError("");
+
+  if (!resetPassword) {
+    setResetError("Current admin password is required.");
+    return;
+  }
+
+  setResetLoading(true);
+  try {
+    const res = await apiFetch("/api/admin/2fa", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: resetPassword, code: resetCode })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      setTwoFactorEnabled(false);
+      setShowResetModal(false);
+      setShowSetup2FA(false);
+      setResetPassword("");
+      setResetCode("");
+      setTwoFactorMessage("✓ Google Authenticator has been reset. You can set it up on a new device whenever needed.");
+      load2FAStatus();
+    } else {
+      setResetError(d.error || "Reset failed. Please check credentials.");
+    }
+  } catch {
+    setResetError("Failed to reset 2FA.");
+  } finally {
+    setResetLoading(false);
+  }
+};
 
 const changeAdminPassword = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -64,12 +183,21 @@ const changeAdminPassword = async (e: React.FormEvent) => {
     setPwdError("New password and confirm password do not match.");
     return;
   }
+  if (twoFactorEnabled && (!pwdTwoFactorCode || pwdTwoFactorCode.length !== 6)) {
+    setPwdError("Please enter your 6-digit Google Authenticator code.");
+    return;
+  }
   setPwdLoading(true);
   try {
     const res = await apiFetch("/api/profile/change-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+        twoFactorCode: twoFactorEnabled ? pwdTwoFactorCode : undefined
+      })
     });
     const d = await res.json();
     if (!res.ok) {
@@ -79,6 +207,7 @@ const changeAdminPassword = async (e: React.FormEvent) => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setPwdTwoFactorCode("");
     }
   } catch {
     setPwdError("Failed to update password.");
@@ -111,10 +240,12 @@ apiFetch("/api/admin/stats",{ cache:"no-store" })
 useEffect(()=>{
 load();
 loadInvites();
-},[load]);
+load2FAStatus();
+},[load, load2FAStatus]);
 
 useRealtimeStream(()=>{
 load();
+load2FAStatus();
 });
 
 
@@ -1151,6 +1282,205 @@ ${Number(u.balance||0).toFixed(2)}
 <section className="panel" style={{ marginTop: "24px" }}>
   <div className="panel-head">
     <div>
+      <span className="eyebrow">Account Security</span>
+      <h2>Google Authenticator (2FA)</h2>
+    </div>
+
+    {twoFactorEnabled ? (
+      <span className="status active" style={{ fontSize: "12px", padding: "6px 12px", background: "rgba(16, 185, 129, 0.15)", color: "#34d399", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+        🛡️ 2FA Active & Protected
+      </span>
+    ) : (
+      <span className="status pending" style={{ fontSize: "12px", padding: "6px 12px", background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24", border: "1px solid rgba(245, 158, 11, 0.3)" }}>
+        ⚠️ 2FA Not Enabled
+      </span>
+    )}
+  </div>
+
+  <p style={{ color: "#94a3b8", fontSize: "13px", marginTop: "4px" }}>
+    Two-Factor Authentication adds an extra layer of security to your admin account. When enabled, a 6-digit code from Google Authenticator is required to sign in and change admin credentials.
+  </p>
+
+  {twoFactorMessage && (
+    <div className="info-banner" style={{ borderLeft: "4px solid #10b981", color: "#10b981", background: "rgba(16, 185, 129, 0.1)", margin: "16px 0" }}>
+      {twoFactorMessage}
+    </div>
+  )}
+
+  {twoFactorError && (
+    <div className="form-error" style={{ margin: "16px 0" }}>
+      {twoFactorError}
+    </div>
+  )}
+
+  {twoFactorEnabled ? (
+    <div style={{ marginTop: "16px", padding: "18px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "14px", maxWidth: "620px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+        <div style={{ fontSize: "28px" }}>✅</div>
+        <div>
+          <b style={{ color: "#f8fafc", fontSize: "15px" }}>Admin Account is Protected</b>
+          <p style={{ color: "#94a3b8", fontSize: "12px", margin: 0 }}>
+            Google Authenticator is actively required on every Admin login and password modification.
+          </p>
+        </div>
+      </div>
+
+      {!showResetModal ? (
+        <button
+          type="button"
+          onClick={() => { setShowResetModal(true); setResetError(""); }}
+          className="table-btn"
+          style={{ padding: "8px 16px", color: "#f87171", borderColor: "rgba(248, 113, 113, 0.3)" }}
+        >
+          🔄 Reset / Re-bind Authenticator (Phone Change / Handover)
+        </button>
+      ) : (
+        <form onSubmit={handleReset2FA} style={{ marginTop: "14px", padding: "14px", background: "rgba(0, 0, 0, 0.25)", borderRadius: "10px", border: "1px solid rgba(248, 113, 113, 0.2)" }}>
+          <b style={{ color: "#f87171", fontSize: "13px", display: "block", marginBottom: "10px" }}>
+            Confirm Reset Authenticator:
+          </b>
+
+          {resetError && <div className="form-error" style={{ marginBottom: "10px" }}>{resetError}</div>}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <label style={{ fontSize: "12px", color: "#94a3b8" }}>
+              Admin Current Password:
+              <input
+                type="password"
+                value={resetPassword}
+                onChange={(e) => setResetPassword(e.target.value)}
+                placeholder="Enter current password"
+                required
+                style={{ marginTop: "4px" }}
+              />
+            </label>
+
+            <label style={{ fontSize: "12px", color: "#94a3b8" }}>
+              Current 6-Digit Authenticator Code:
+              <input
+                type="text"
+                maxLength={6}
+                inputMode="numeric"
+                value={resetCode}
+                onChange={(e) => setResetCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="000000"
+                required
+                style={{ marginTop: "4px" }}
+              />
+            </label>
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+              <button
+                type="submit"
+                className="btn danger-btn"
+                disabled={resetLoading}
+                style={{ padding: "8px 16px" }}
+              >
+                {resetLoading ? "Resetting..." : "Confirm Reset 2FA"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="table-btn"
+                style={{ padding: "8px 16px" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
+  ) : (
+    <div style={{ marginTop: "16px" }}>
+      {!showSetup2FA ? (
+        <button
+          type="button"
+          onClick={startSetup2FA}
+          disabled={twoFactorLoading}
+          className="btn"
+          style={{ minWidth: "220px" }}
+        >
+          {twoFactorLoading ? "Generating QR…" : "📲 Setup Google Authenticator"}
+        </button>
+      ) : (
+        <div style={{ padding: "20px", background: "rgba(255, 255, 255, 0.025)", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "16px", maxWidth: "580px" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#38bdf8", marginBottom: "12px" }}>
+            Step 1: Scan QR Code with Google Authenticator
+          </h3>
+          <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "16px" }}>
+            Open the <b>Google Authenticator</b> app on your mobile phone, tap <b>+</b> and choose <b>Scan a QR code</b>.
+          </p>
+
+          {twoFactorQR && (
+            <div style={{ display: "flex", justifyContent: "center", padding: "12px", background: "#ffffff", borderRadius: "12px", width: "fit-content", margin: "0 auto 16px" }}>
+              <img src={twoFactorQR} alt="Google Authenticator QR Code" style={{ width: "200px", height: "200px", display: "block" }} />
+            </div>
+          )}
+
+          {twoFactorSecret && (
+            <div style={{ padding: "10px 14px", background: "rgba(0,0,0,0.3)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: "18px", textAlign: "center" }}>
+              <span style={{ fontSize: "11px", color: "#94a3b8", display: "block" }}>Manual Setup Key (if camera scan not working):</span>
+              <code style={{ fontSize: "14px", color: "#fbbf24", fontWeight: 700, letterSpacing: "2px" }}>{twoFactorSecret}</code>
+            </div>
+          )}
+
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#38bdf8", marginBottom: "8px" }}>
+            Step 2: Verify & Activate
+          </h3>
+          <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "12px" }}>
+            Enter the 6-digit code currently shown in your Google Authenticator app to confirm:
+          </p>
+
+          <form onSubmit={activate2FA} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <input
+              type="text"
+              maxLength={6}
+              inputMode="numeric"
+              value={twoFactorCode}
+              onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="000000"
+              required
+              style={{
+                textAlign: "center",
+                fontSize: "22px",
+                letterSpacing: "6px",
+                fontWeight: 700,
+                maxWidth: "240px",
+                margin: "0 auto"
+              }}
+            />
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "6px" }}>
+              <button
+                type="submit"
+                className="btn"
+                disabled={twoFactorLoading || twoFactorCode.length !== 6}
+                style={{ minWidth: "160px" }}
+              >
+                {twoFactorLoading ? "Activating…" : "✓ Verify & Activate 2FA"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setShowSetup2FA(false); setTwoFactorCode(""); setTwoFactorError(""); }}
+                className="table-btn"
+                style={{ padding: "8px 16px" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  )}
+</section>
+
+<section className="panel" style={{ marginTop: "24px" }}>
+  <div className="panel-head">
+    <div>
       <span className="eyebrow">Security & Credentials</span>
       <h2>Change Admin Password</h2>
     </div>
@@ -1201,6 +1531,22 @@ ${Number(u.balance||0).toFixed(2)}
         required
       />
     </label>
+
+    {twoFactorEnabled && (
+      <label>
+        Google Authenticator Code (6-Digit)
+        <input
+          type="text"
+          maxLength={6}
+          inputMode="numeric"
+          value={pwdTwoFactorCode}
+          onChange={(e) => setPwdTwoFactorCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          placeholder="Enter 6-digit code from app"
+          required
+          style={{ letterSpacing: "4px", fontWeight: 700 }}
+        />
+      </label>
+    )}
 
     <div style={{ marginTop: "8px" }}>
       <button

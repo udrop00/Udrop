@@ -49,6 +49,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Current password is incorrect." }, { status: 401 });
   }
 
+  // 2FA Security check for Admin
+  if (target.role === "admin" && target.twoFactorEnabled && target.twoFactorSecret) {
+    const code = String(body.twoFactorCode || "").trim();
+    if (!code) {
+      return NextResponse.json({ error: "6-digit Google Authenticator code is required." }, { status: 400 });
+    }
+    const { verifyTOTP } = await import("../../../lib/totp");
+    const isTotpValid = verifyTOTP(code, target.twoFactorSecret);
+    if (!isTotpValid) {
+      return NextResponse.json({ error: "Invalid Google Authenticator code." }, { status: 400 });
+    }
+  }
+
   const { salt, hash } = hashPassword(newPassword);
   target.passwordHash = hash;
   target.salt = salt;
