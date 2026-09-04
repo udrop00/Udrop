@@ -685,6 +685,14 @@ active={pathname==="/withdrawal"}
 
 </Nav>
 
+<Nav
+href="/support"
+active={pathname==="/support"}
+>
+💬 Live Support {unread > 0 && <span className="nav-badge">{unread}</span>}
+
+</Nav>
+
 
 
 
@@ -1084,6 +1092,13 @@ active={pathname.startsWith("/admin/package-requests")}
   active={pathname.startsWith("/admin/withdrawals")}
 >
   ▤ Withdrawal Requests
+</Nav>
+
+<Nav
+  href="/admin/support"
+  active={pathname.startsWith("/admin/support")}
+>
+  💬 Live Support
 </Nav>
 
 
