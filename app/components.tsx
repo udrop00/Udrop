@@ -757,45 +757,44 @@ style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoratio
 </a>
 
 
-  <div className="seller-rating">
+  <div className="seller-rating" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
 
     <span>
       Rating
     </span>
 
-    <strong className="rating-stars">
-
-{
-Array.from({length:5}).map((_,i)=>{
-
-const fill=Math.min(
-Math.max(sellerRating-i,0),
-1
-)*100;
-
-
-return(
-<span
-key={i}
-style={{
-background:
-`linear-gradient(90deg,#ffd43b ${fill}%,#39465a ${fill}%)`,
-WebkitBackgroundClip:"text",
-color:"transparent"
-}}
->
-★
-</span>
-);
-
-})
-}
-
-</strong>
+    <strong className="rating-stars" style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+      {Array.from({ length: 5 }).map((_, i) => {
+        const fill = Math.min(Math.max(sellerRating - i, 0), 1);
+        const gradId = `star-gold-grad-${i}`;
+        return (
+          <svg
+            key={i}
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}
+          >
+            <defs>
+              <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset={`${fill * 100}%`} stopColor="#ffd43b" />
+                <stop offset={`${fill * 100}%`} stopColor="#475569" />
+              </linearGradient>
+            </defs>
+            <path
+              fill={`url(#${gradId})`}
+              stroke="#ffd43b"
+              strokeWidth={fill > 0 ? "0.5" : "0"}
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            />
+          </svg>
+        );
+      })}
+    </strong>
 
     <b>
-  {sellerRating.toFixed(1)}
-</b>
+      {sellerRating.toFixed(1)}
+    </b>
 
   </div>
 

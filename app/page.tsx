@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Logo } from "./components";
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -19,12 +20,7 @@ export default function Home() {
   return (
     <main className="landing">
       <nav className="nav container">
-        <Link href="/" className="brand" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <span style={{ fontSize: "28px", fontWeight: 900, letterSpacing: "-0.5px" }}>
-            <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
-            <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 16px rgba(251, 191, 36, 0.6)" }}>drop</span>
-          </span>
-        </Link>
+        <Logo />
         <div className="nav-links">
           <Link href="/login">Login</Link>
           <Link className="btn btn-small" href="/register">Get Started</Link>
@@ -129,12 +125,7 @@ export default function Home() {
       </section>
 
       <footer className="footer container">
-        <Link href="/" className="brand" style={{ textDecoration: "none" }}>
-          <span style={{ fontSize: "22px", fontWeight: 900, letterSpacing: "-0.5px" }}>
-            <span style={{ color: "#ffffff", fontWeight: 900 }}>U</span>
-            <span style={{ color: "#fbbf24", fontWeight: 900, textShadow: "0 0 16px rgba(251, 191, 36, 0.6)" }}>drop</span>
-          </span>
-        </Link>
+        <Logo />
         <span>Udrop workspace © {new Date().getFullYear()}</span>
       </footer>
     </main>
