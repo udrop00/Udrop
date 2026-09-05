@@ -21,6 +21,8 @@ export default function SalesmartlyWidget() {
 
     // 1. If on /admin, strictly hide all SaleSmartly widget elements
     if (isAdmin) {
+      document.body.classList.add("admin-mode");
+
       if (!hideStyle) {
         hideStyle = document.createElement("style");
         hideStyle.id = styleId;
@@ -28,24 +30,48 @@ export default function SalesmartlyWidget() {
           [id*="salesmartly"],
           [class*="salesmartly"],
           iframe[src*="salesmartly"],
+          iframe[id*="salesmartly"],
           div[id^="ss_"],
+          div[id^="ss-"],
           div[id*="salesmartly"],
-          #salesmartly-container {
+          #salesmartly-container,
+          #salesmartly-widget {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
             pointer-events: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: absolute !important;
+            left: -9999px !important;
+            top: -9999px !important;
           }
         `;
         document.head.appendChild(hideStyle);
       }
 
-      try {
-        (window as any).ssq?.push(["hide"]);
-        (window as any).salesmartly?.hide?.();
-      } catch {}
-      return;
+      const hideElements = () => {
+        try {
+          (window as any).ssq?.push(["hide"]);
+          (window as any).salesmartly?.hide?.();
+        } catch {}
+        const elements = document.querySelectorAll(
+          '[id*="salesmartly"], [class*="salesmartly"], iframe[src*="salesmartly"], div[id^="ss_"], div[id^="ss-"], #salesmartly-container, #salesmartly-widget'
+        );
+        elements.forEach((el) => {
+          (el as HTMLElement).style.setProperty("display", "none", "important");
+          (el as HTMLElement).style.setProperty("visibility", "hidden", "important");
+          (el as HTMLElement).style.setProperty("opacity", "0", "important");
+          (el as HTMLElement).style.setProperty("pointer-events", "none", "important");
+        });
+      };
+
+      hideElements();
+      const hideInterval = setInterval(hideElements, 600);
+      return () => clearInterval(hideInterval);
     }
+
+    document.body.classList.remove("admin-mode");
 
     // 2. Non-admin pages: remove hide style & show widget
     if (hideStyle) {

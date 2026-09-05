@@ -2341,3 +2341,26 @@ margin-left:22px;
   line-height: 1.6;
   text-align: center;
 }
+
+/* Strictly hide third-party chat widgets on Admin Pages */
+body.admin-mode [id*="salesmartly"],
+body.admin-mode [class*="salesmartly"],
+body.admin-mode [id^="ss_"],
+body.admin-mode [id^="ss-"],
+body.admin-mode [class*="ss-"],
+body.admin-mode [class*="ss_"],
+body.admin-mode iframe[src*="salesmartly"],
+body.admin-mode iframe[id*="salesmartly"],
+body.admin-mode #salesmartly-container,
+body.admin-mode #salesmartly-widget,
+body.admin-mode #salesmartly-widget-script {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
