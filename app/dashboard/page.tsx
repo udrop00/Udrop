@@ -51,13 +51,23 @@ export default function Dashboard(){
   });
 
 
-  // Store Views — starts at realistic number and fluctuates live within admin configured min & max bounds
+  // Store Views — starts at 0 for fresh user; fluctuates live when configured by admin
   useEffect(()=>{
+    const min = Number(data?.user?.viewsMin ?? 0);
+    const max = Number(data?.user?.viewsMax ?? 0);
 
-    const min = Number(data?.user?.viewsMin ?? 600);
-    const max = Number(data?.user?.viewsMax ?? 3200);
+    if (min <= 0 && max <= 0) {
+      setStoreViews(0);
+      return;
+    }
+
     const safeMin = Math.max(0, Math.min(min, max));
-    const safeMax = Math.max(safeMin + 5, Math.max(min, max));
+    const safeMax = Math.max(safeMin, Math.max(min, max));
+
+    if (safeMin === safeMax) {
+      setStoreViews(safeMin);
+      return;
+    }
 
     const initial =
       Math.floor(Math.random() * (safeMax - safeMin + 1)) + safeMin;
@@ -65,23 +75,17 @@ export default function Dashboard(){
     setStoreViews(initial);
 
     const interval = setInterval(()=>{
-
       setStoreViews(prev=>{
-
-        const step = Math.max(2, Math.floor((safeMax - safeMin) * 0.03));
+        const step = Math.max(1, Math.floor((safeMax - safeMin) * 0.03));
         const delta =
           Math.floor(Math.random() * (step * 2 + 1)) - step;
-
-        const next = (prev || initial) + delta;
-
+        const current = (prev === 0 ? initial : prev);
+        const next = current + delta;
         return Math.min(safeMax, Math.max(safeMin, next));
-
       });
-
     }, 3500);
 
     return ()=>clearInterval(interval);
-
   },[data?.user?.viewsMin, data?.user?.viewsMax]);
 
 

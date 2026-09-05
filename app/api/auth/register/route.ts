@@ -129,6 +129,8 @@ kycDocuments: [
       pendingBalance: 0,
       guaranteeMoney: 0,
       sellerRating: 0,
+      viewsMin: 0,
+      viewsMax: 0,
 
       role: "customer" as const,
       status: "Active" as const,

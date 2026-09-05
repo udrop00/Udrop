@@ -161,8 +161,8 @@ export async function PATCH(
     body.viewsMin !== undefined ||
     body.viewsMax !== undefined
   ){
-    const minV = body.viewsMin !== undefined ? Math.max(0, parseInt(body.viewsMin, 10)) : Number(user.viewsMin ?? 600);
-    const maxV = body.viewsMax !== undefined ? Math.max(0, parseInt(body.viewsMax, 10)) : Number(user.viewsMax ?? 3200);
+    const minV = body.viewsMin !== undefined ? Math.max(0, parseInt(body.viewsMin, 10)) : Number(user.viewsMin ?? 0);
+    const maxV = body.viewsMax !== undefined ? Math.max(0, parseInt(body.viewsMax, 10)) : Number(user.viewsMax ?? 0);
 
     if(!Number.isFinite(minV) || !Number.isFinite(maxV) || minV < 0 || maxV < 0){
       return NextResponse.json(

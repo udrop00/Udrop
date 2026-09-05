@@ -25,8 +25,8 @@ export default function UserDetail(){
   const [sellerRating,setSellerRating]=useState("0");
   const [savingRating,setSavingRating]=useState(false);
 
-  const [viewsMin,setViewsMin]=useState("600");
-  const [viewsMax,setViewsMax]=useState("3200");
+  const [viewsMin,setViewsMin]=useState("0");
+  const [viewsMax,setViewsMax]=useState("0");
   const [savingViews,setSavingViews]=useState(false);
 
   const [adjust,setAdjust]=useState("");
@@ -45,8 +45,8 @@ export default function UserDetail(){
         setOrders(d.orders || []);
         setGuaranteeMoney(String(Number(d.user?.guaranteeMoney || 0)));
         setSellerRating(String(Number(d.user?.sellerRating || 0)));
-        setViewsMin(String(Number(d.user?.viewsMin ?? 600)));
-        setViewsMax(String(Number(d.user?.viewsMax ?? 3200)));
+        setViewsMin(String(Number(d.user?.viewsMin ?? 0)));
+        setViewsMax(String(Number(d.user?.viewsMax ?? 0)));
       }
     } catch {} finally {
       setLoading(false);
