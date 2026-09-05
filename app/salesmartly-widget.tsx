@@ -25,7 +25,7 @@ export default function SalesmartlyWidget() {
     const script = document.createElement("script");
     script.id = "salesmartly-widget-script";
     script.src =
-      "https://plugin-code.salesmartly.com/js/project_811865_851858_1788498316.js";
+      "https://plugin-code.salesmartly.com/js/project_822568_852939_1788610045.js";
     document.body.appendChild(script);
 
   }, [isAdmin]);
