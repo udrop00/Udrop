@@ -11,16 +11,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.udropglobal.com"),
-  title: "Udrop - Global Dropshipping Platform",
-  description: "Udrop Global Dropshipping Platform",
+  title: "Udrop - Global Marketplace",
+  description: "Udrop Global Marketplace",
   icons: {
     icon: "/dropzone-logo.png",
     shortcut: "/dropzone-logo.png",
     apple: "/dropzone-logo.png"
   },
   openGraph: {
-    title: "Udrop - Global Dropshipping Platform",
-    description: "Udrop Global Dropshipping Platform",
+    title: "Udrop - Global Marketplace",
+    description: "Udrop Global Marketplace",
     url: "https://www.udropglobal.com",
     siteName: "Udrop Global",
     images: [
@@ -28,15 +28,15 @@ export const metadata: Metadata = {
         url: "https://www.udropglobal.com/dropzone-logo.png",
         width: 1200,
         height: 630,
-        alt: "Udrop Global Dropshipping Platform"
+        alt: "Udrop Global Marketplace"
       }
     ],
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "Udrop - Global Dropshipping Platform",
-    description: "Udrop Global Dropshipping Platform",
+    title: "Udrop - Global Marketplace",
+    description: "Udrop Global Marketplace",
     images: ["https://www.udropglobal.com/dropzone-logo.png"]
   }
 };
