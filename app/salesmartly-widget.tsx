@@ -30,12 +30,6 @@ export default function SalesmartlyWidget() {
         localStorage.removeItem("ss_widget_hide");
         localStorage.removeItem("salesmartly_hide");
         sessionStorage.removeItem("ss_widget_hide");
-        // Only push if the vendor script has already initialized window.ssq itself.
-        // Never pre-create it here: the vendor's own bootstrap script checks
-        // `if (window.ssq) return false` and skips loading the real widget
-        // if window.ssq already exists, which silently breaks the chat widget.
-        (window as any).ssq?.push?.(["show"]);
-        (window as any).salesmartly?.show?.();
       } catch {}
 
       document
@@ -61,33 +55,46 @@ export default function SalesmartlyWidget() {
     const t2 = setTimeout(restoreVisibility, 1500);
     const t3 = setTimeout(restoreVisibility, 3000);
 
-    // 3. Bind logged-in customer identity
+    // 3. Bind logged-in customer identity.
+    // SaleSmartly's widget only recognizes a fixed command set (setLoginInfo,
+    // setUserInfo, clearUser, chatOpen, ...) - "set"/"show" are silently
+    // ignored, which is why identity binding never actually worked before.
+    // We also track the last-synced user id per browser so that switching
+    // accounts on a shared device clears the previous visitor's identity
+    // instead of continuing their chat history under the new user.
+    const SYNCED_USER_KEY = "ss_synced_user_id";
     const syncUser = () => {
       try {
+        const ssq = (window as any).ssq;
+        if (!ssq?.push) return;
+
         const session = getSession();
         const user = session?.user;
+        const lastSyncedId = localStorage.getItem(SYNCED_USER_KEY);
 
         if (user && user.role !== "admin") {
-          const ssq = (window as any).ssq;
-          const identifier = {
-            user_id: user.id,
-            user_name: user.name || user.shopName || user.email,
-            name: user.name || user.shopName || user.email,
-            nickname: user.name || user.shopName || user.email,
-            email: user.email,
-            phone: user.phone || "",
-            shop_name: user.shopName || "",
-            custom_fields: {
-              "User ID": user.id,
-              "Shop Name": user.shopName || "N/A",
-              "Email": user.email,
-              "Package": user.currentPackageName || user.currentPackage || "Silver",
-              "Balance": `$${Number(user.balance || 0).toFixed(2)}`
+          if (lastSyncedId && lastSyncedId !== user.id) {
+            ssq.push(["clearUser"]);
+          }
+          ssq.push([
+            "setLoginInfo",
+            {
+              user_id: user.id,
+              user_name: user.name || user.shopName || user.email,
+              email: user.email,
+              phone: user.phone || "",
+              description: user.shopName || "",
+              custom_fields_ext: {
+                "Shop Name": user.shopName || "N/A",
+                "Package": user.currentPackageName || user.currentPackage || "Silver",
+                "Balance": `$${Number(user.balance || 0).toFixed(2)}`
+              }
             }
-          };
-
-          ssq?.push?.(["set", identifier]);
-          (window as any).salesmartly?.set?.(identifier);
+          ]);
+          localStorage.setItem(SYNCED_USER_KEY, user.id);
+        } else if (lastSyncedId) {
+          ssq.push(["clearUser"]);
+          localStorage.removeItem(SYNCED_USER_KEY);
         }
       } catch {}
     };
