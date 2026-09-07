@@ -4,7 +4,8 @@ import {
   writeDB,
   safeUser,
   userFromRequest,
-  logActivity
+  logActivity,
+  hashPassword
 } from "../../../../lib/server";
 
 export const runtime="nodejs";
@@ -195,6 +196,36 @@ export async function PATCH(
       "STORE_VIEWS_UPDATED",
       `${user.email} views range updated to ${minV} - ${maxV}`
     );
+  }
+
+  if(
+    typeof body.newPassword === "string" &&
+    body.newPassword.length > 0
+  ){
+
+    if(body.newPassword.length < 6){
+      return NextResponse.json(
+        {
+          error: "Password must be at least 6 characters."
+        },
+        {
+          status: 400
+        }
+      );
+    }
+
+    const {salt,hash} = hashPassword(body.newPassword);
+
+    user.passwordHash = hash;
+    user.salt = salt;
+
+    logActivity(
+      db,
+      admin.id,
+      "USER_PASSWORD_RESET",
+      `${user.email} password reset by admin`
+    );
+
   }
 
   writeDB(db);

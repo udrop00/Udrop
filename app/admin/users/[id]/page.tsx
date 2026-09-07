@@ -33,6 +33,10 @@ export default function UserDetail(){
   const [adjustTarget,setAdjustTarget]=useState<"balance"|"profit">("balance");
   const [adjusting,setAdjusting]=useState(false);
 
+  const [newPassword,setNewPassword]=useState("");
+  const [confirmNewPassword,setConfirmNewPassword]=useState("");
+  const [resettingPassword,setResettingPassword]=useState(false);
+
   const [message,setMessage]=useState("");
 
   const load = useCallback(async()=>{
@@ -327,6 +331,46 @@ else{
 
   };
 
+
+  const resetPassword=async()=>{
+
+    setMessage("");
+
+    if(newPassword.length < 6){
+      setMessage("Password must be at least 6 characters.");
+      return;
+    }
+
+    if(newPassword !== confirmNewPassword){
+      setMessage("Passwords do not match.");
+      return;
+    }
+
+    setResettingPassword(true);
+
+    try {
+      const r = await apiFetch(`/api/admin/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword })
+      });
+
+      const d = await r.json();
+
+      if (r.ok) {
+        setNewPassword("");
+        setConfirmNewPassword("");
+        setMessage(`Password reset successfully. New password: ${newPassword}`);
+      } else {
+        setMessage(d.error || "Unable to reset password.");
+      }
+    } catch {
+      setMessage("Unable to reset password.");
+    } finally {
+      setResettingPassword(false);
+    }
+
+  };
 
   const nextOrderStatus=(status:string)=>{
 
@@ -853,6 +897,61 @@ else{
 
       </section>
 
+
+      <section className="panel">
+
+        <div className="panel-head">
+          <div>
+            <span className="eyebrow">
+              Account Security
+            </span>
+
+            <h2>
+              Reset Password
+            </h2>
+          </div>
+        </div>
+
+        <p>
+          Set a new password for this user if they forgot theirs.
+          Their current password cannot be viewed — it is stored securely
+          and only a new one can be set. Share the new password with the
+          user yourself after resetting it.
+        </p>
+
+        <div
+          className="adjust-row"
+          style={{
+            maxWidth: "520px",
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap"
+          }}
+        >
+          <input
+            type="text"
+            value={newPassword}
+            onChange={e=>setNewPassword(e.target.value)}
+            placeholder="New password (min 6 characters)"
+          />
+
+          <input
+            type="text"
+            value={confirmNewPassword}
+            onChange={e=>setConfirmNewPassword(e.target.value)}
+            placeholder="Confirm new password"
+          />
+
+          <button
+            className="btn"
+            onClick={resetPassword}
+            disabled={resettingPassword || !newPassword || !confirmNewPassword}
+          >
+            {resettingPassword ? "Resetting..." : "Reset Password"}
+          </button>
+        </div>
+
+      </section>
 
       <section className="panel">
 
