@@ -116,7 +116,7 @@ export async function POST(req: Request) {
 
     if (!user || !verifyPassword(pwd, user)) {
       return NextResponse.json(
-        { error: "Invalid email or password. If you forgot your password, please contact support via Live Chat." },
+        { error: "Invalid email or password. If you forgot your password, please contact to the customer support." },
         { status: 401 }
       );
     }
