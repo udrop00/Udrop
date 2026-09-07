@@ -9,14 +9,21 @@ type Conversation = { id:string; customerId:string; status:"open"|"closed"; upda
 type Invite = { id:string; token:string; createdBy:string; createdAt:string; expiresAt:number; usedAt?:string; usedBy?:string; revokedAt?:string };
 type DB = { users:User[]; sessions:Record<string,{userId:string;expiresAt:number}>; activity:{id:string;userId:string;action:string;description:string;createdAt:string}[]; conversations:Conversation[]; messages:Message[]; invites:Invite[]; products:any[]; orders:any[]; packages:any[]; packageRequests:any[]; withdrawals:any[]; [key:string]:any };
 
+let loggedDbFile = false;
 function getDbFile(): string {
+  let resolved: string;
   if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
-    return path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "db.json");
+    resolved = path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "db.json");
+  } else if (fs.existsSync("/data")) {
+    resolved = "/data/db.json";
+  } else {
+    resolved = path.join(process.cwd(), "data", "db.json");
   }
-  if (fs.existsSync("/data")) {
-    return "/data/db.json";
+  if (!loggedDbFile) {
+    loggedDbFile = true;
+    console.log(`[db] Using database file at: ${resolved} (RAILWAY_VOLUME_MOUNT_PATH=${process.env.RAILWAY_VOLUME_MOUNT_PATH || "unset"})`);
   }
-  return path.join(process.cwd(), "data", "db.json");
+  return resolved;
 }
 
 const seedFile=path.join(process.cwd(),"data","seed.json");
