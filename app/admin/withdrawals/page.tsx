@@ -163,6 +163,29 @@ export default function AdminWithdrawals(){
   };
 
 
+  const deleteWithdrawal = async(id:string)=>{
+
+    try{
+      const r = await apiFetch(
+        `/api/withdrawals?id=${id}`,
+        { method:"DELETE" }
+      );
+
+      if(!r.ok){
+        const d = await r.json();
+        setError(d.error || "Unable to delete request.");
+        return;
+      }
+
+      await loadRequests();
+
+    }catch{
+      setError("Unable to delete request.");
+    }
+
+  };
+
+
   return(
 
     <AdminShell>
@@ -438,9 +461,14 @@ export default function AdminWithdrawals(){
 
                         ) : (
 
-                          <span className="hint">
-                            Processed
-                          </span>
+                          <button
+                            type="button"
+                            className="table-btn danger-btn"
+                            title="Delete from history"
+                            onClick={()=>deleteWithdrawal(request.id)}
+                          >
+                            🗑️
+                          </button>
 
                         )}
 

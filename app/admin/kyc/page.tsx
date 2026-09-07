@@ -87,6 +87,17 @@ export default function AdminKyc(){
   };
 
 
+  const deleteKycHistory = async(userId:string)=>{
+
+    await apiFetch(`/api/admin/kyc?userId=${userId}`, {
+      method:"DELETE"
+    });
+
+    load();
+
+  };
+
+
 
   if(loading){
 
@@ -316,6 +327,26 @@ export default function AdminKyc(){
                 Reject
               </button>
 
+
+            </div>
+
+)}
+
+{tab!=="pending" && (
+
+            <div style={{
+              display:"flex",
+              gap:10,
+              marginTop:20
+            }}>
+
+              <button
+                className="btn btn-danger"
+                title="Delete from history"
+                onClick={()=>deleteKycHistory(u.id)}
+              >
+                🗑️ Delete
+              </button>
 
             </div>
 

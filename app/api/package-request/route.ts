@@ -551,3 +551,48 @@ export async function PATCH(req: Request) {
   });
 
 }
+
+
+// DELETE a processed (approved/rejected) package request from history.
+// Pending requests can't be deleted - they must be approved/rejected first.
+export async function DELETE(req: Request) {
+
+  const admin = userFromRequest(req);
+
+  if (!admin || admin.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    return NextResponse.json({ error: "Request id is required." }, { status: 400 });
+  }
+
+  const db = readDB();
+
+  const index = (db.packageRequests || []).findIndex(
+    (r: any) => r.id === id
+  );
+
+  if (index < 0) {
+    return NextResponse.json({ error: "Package request not found." }, { status: 404 });
+  }
+
+  const request = db.packageRequests[index];
+
+  if (request.status === "pending") {
+    return NextResponse.json(
+      { error: "Pending requests can't be deleted - approve or reject it first." },
+      { status: 400 }
+    );
+  }
+
+  db.packageRequests.splice(index, 1);
+
+  writeDB(db);
+
+  return NextResponse.json({ ok: true });
+
+}

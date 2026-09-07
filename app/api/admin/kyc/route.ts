@@ -55,6 +55,8 @@ const applications = db.users
 
       if(u.role !== "customer") return false;
 
+      if(u.kycHiddenFromHistory) return false;
+
 
       if(status==="pending"){
         return u.kycStatus !== "Approved" && u.kycStatus !== "Rejected";
@@ -233,5 +235,52 @@ export async function PATCH(req:Request){
     ok:true,
     status:user.kycStatus
   });
+
+}
+
+
+// DELETE a processed (Approved/Rejected) KYC entry from history.
+// Only clears the stored documents and hides it from the history list -
+// the user's approved/rejected status and account stay untouched.
+export async function DELETE(req: Request){
+
+  const admin = userFromRequest(req);
+
+  if(!admin || admin.role !== "admin"){
+    return NextResponse.json({ error:"Forbidden" }, { status:403 });
+  }
+
+  const url = new URL(req.url);
+  const userId = url.searchParams.get("userId");
+
+  if(!userId){
+    return NextResponse.json({ error:"User id is required." }, { status:400 });
+  }
+
+  const db = readDB();
+
+  const user = db.users.find(
+    (u:any)=>u.id===userId && u.role==="customer"
+  );
+
+  if(!user){
+    return NextResponse.json({ error:"User not found." }, { status:404 });
+  }
+
+  if(user.kycStatus !== "Approved" && user.kycStatus !== "Rejected"){
+    return NextResponse.json(
+      { error:"Only processed (approved/rejected) applications can be deleted from history." },
+      { status:400 }
+    );
+  }
+
+  user.kycDocuments = [];
+  user.kycHiddenFromHistory = true;
+
+  logActivity(db, admin.id, "KYC_HISTORY_DELETED", `Removed KYC history entry for ${user.email}`);
+
+  writeDB(db);
+
+  return NextResponse.json({ ok:true });
 
 }

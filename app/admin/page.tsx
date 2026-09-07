@@ -413,6 +413,27 @@ loadInvites();
 };
 
 
+const deleteInvite=async(token:string)=>{
+
+
+await apiFetch(
+
+`/api/admin/invites/${encodeURIComponent(token)}?permanent=true`,
+
+{
+method:"DELETE"
+}
+
+);
+
+
+
+loadInvites();
+
+
+};
+
+
 
 
 
@@ -1097,7 +1118,7 @@ Action
 <td>
 
 
-{!i.used && !i.revoked && (
+{!i.used && !i.revoked ? (
 
 <button
 
@@ -1108,6 +1129,22 @@ onClick={()=>revokeInvite(i.token)}
 >
 
 Revoke
+
+</button>
+
+) : (
+
+<button
+
+className="table-btn danger-btn"
+
+title="Delete from history"
+
+onClick={()=>deleteInvite(i.token)}
+
+>
+
+🗑️
 
 </button>
 

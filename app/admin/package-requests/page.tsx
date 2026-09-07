@@ -81,6 +81,31 @@ export default function AdminPackageRequests(){
   };
 
 
+  const deleteRequest = async(id:string)=>{
+
+    setMessage("");
+
+    const r = await apiFetch(
+      `/api/package-request?id=${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    const d = await r.json();
+
+    if(!r.ok){
+      setMessage(d.error || "Unable to delete request.");
+      return;
+    }
+
+    setMessage("Request removed from history.");
+
+    load();
+
+  };
+
+
   return (
 
     <AdminShell>
@@ -227,43 +252,57 @@ export default function AdminPackageRequests(){
 
                     <td>
 
-                      {request.status === "pending" && (
+                      <div
+                        style={{
+                          display:"flex",
+                          gap:"8px"
+                        }}
+                      >
 
-                        <div
-                          style={{
-                            display:"flex",
-                            gap:"8px"
-                          }}
-                        >
+                        {request.status === "pending" ? (
 
-                          <button
-                            className="table-btn"
-                            onClick={()=>
-                              updateRequest(
-                                request.id,
-                                "approved"
-                              )
-                            }
-                          >
-                            Approve
-                          </button>
+                          <>
 
+                            <button
+                              className="table-btn"
+                              onClick={()=>
+                                updateRequest(
+                                  request.id,
+                                  "approved"
+                                )
+                              }
+                            >
+                              Approve
+                            </button>
+
+
+                            <button
+                              className="table-btn danger-btn"
+                              onClick={()=>
+                                updateRequest(
+                                  request.id,
+                                  "rejected"
+                                )
+                              }
+                            >
+                              Reject
+                            </button>
+
+                          </>
+
+                        ) : (
 
                           <button
                             className="table-btn danger-btn"
-                            onClick={()=>
-                              updateRequest(
-                                request.id,
-                                "rejected"
-                              )
-                            }
+                            title="Delete from history"
+                            onClick={()=>deleteRequest(request.id)}
                           >
-                            Reject
+                            🗑️
                           </button>
 
-                        </div>
+                        )}
 
-                      )}
+                      </div>
 
                     </td>
 
