@@ -8,15 +8,33 @@ type Message = { id:string; conversationId:string; senderId:string; text:string;
 type Conversation = { id:string; customerId:string; status:"open"|"closed"; updatedAt:string };
 type Invite = { id:string; token:string; createdBy:string; createdAt:string; expiresAt:number; usedAt?:string; usedBy?:string; revokedAt?:string };
 type DB = { users:User[]; sessions:Record<string,{userId:string;expiresAt:number}>; activity:{id:string;userId:string;action:string;description:string;createdAt:string}[]; conversations:Conversation[]; messages:Message[]; invites:Invite[]; products:any[]; orders:any[]; packages:any[]; packageRequests:any[]; withdrawals:any[]; [key:string]:any };
-const file=path.join(process.cwd(),"data","db.json");
+
+function getDbFile(): string {
+  if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+    return path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "db.json");
+  }
+  if (fs.existsSync("/data")) {
+    return "/data/db.json";
+  }
+  return path.join(process.cwd(), "data", "db.json");
+}
+
 const seedFile=path.join(process.cwd(),"data","seed.json");
 function ensure(){
-  if(!fs.existsSync(file)){
-    fs.mkdirSync(path.dirname(file),{recursive:true});
+  const dbFile = getDbFile();
+  if(!fs.existsSync(dbFile)){
+    fs.mkdirSync(path.dirname(dbFile),{recursive:true});
+    const defaultLocalFile = path.join(process.cwd(),"data","db.json");
+    if(fs.existsSync(defaultLocalFile)){
+      try {
+        fs.copyFileSync(defaultLocalFile, dbFile);
+        return;
+      } catch {}
+    }
     if(fs.existsSync(seedFile)){
-      fs.copyFileSync(seedFile,file);
+      fs.copyFileSync(seedFile,dbFile);
     } else {
-      fs.writeFileSync(file,JSON.stringify({users:[],sessions:{},activity:[],conversations:[],messages:[],invites:[],packages:[],packageRequests:[],withdrawals:[],sellerProducts:[],notifications:[],products:DEFAULT_PRODUCTS},null,2));
+      fs.writeFileSync(dbFile,JSON.stringify({users:[],sessions:{},activity:[],conversations:[],messages:[],invites:[],packages:[],packageRequests:[],withdrawals:[],sellerProducts:[],notifications:[],products:DEFAULT_PRODUCTS},null,2));
     }
   }
 }
@@ -25,7 +43,8 @@ export function getDBRevision(){ return globalDBRevision; }
 export function touchDBRevision(){ globalDBRevision = Date.now(); }
 export function readDB():DB{
   ensure();
-  let db:DB=JSON.parse(fs.readFileSync(file,"utf8"));
+  const dbFile = getDbFile();
+  let db:DB=JSON.parse(fs.readFileSync(dbFile,"utf8"));
   if(!db.users) db.users=[];
   if(!db.invites) db.invites=[];
   if(!db.products) db.products=[];
@@ -94,7 +113,7 @@ export function readDB():DB{
   for(const m of db.messages){if(!Array.isArray(m.readBy))m.readBy=[];}
   return db;
 }
-export function writeDB(db:DB){fs.writeFileSync(file,JSON.stringify(db,null,2)); globalDBRevision = Date.now();}
+export function writeDB(db:DB){ensure(); const dbFile = getDbFile(); fs.writeFileSync(dbFile,JSON.stringify(db,null,2)); globalDBRevision = Date.now();}
 export function hashPassword(password:string,salt?:string){const s=salt||crypto.randomBytes(16).toString("hex");return {salt:s,hash:crypto.scryptSync(password,Buffer.from(s,"hex"),64).toString("hex")};}
 export function verifyPassword(password:string,user:User){const hash=crypto.scryptSync(password,Buffer.from(user.salt,"hex"),64).toString("hex");return crypto.timingSafeEqual(Buffer.from(hash,"hex"),Buffer.from(user.passwordHash,"hex"));}
 export function safeUser(u:User){
