@@ -147,7 +147,7 @@ export default function MyStore(){
               </p>
             </div>
 
-            <div style={{display:"flex",gap:"10px",alignItems:"center"}}>
+            <div className="action-btn-row" style={{display:"flex",gap:"10px",alignItems:"center"}}>
               <button
                 className="btn btn-small"
                 style={{

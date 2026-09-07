@@ -1500,6 +1500,19 @@ width:100%;
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
   }
+  /* An odd last card would otherwise sit alone with an empty gap beside it */
+  .stat-grid > .stat:last-child:nth-child(odd),
+  .admin-stats > .stat:last-child:nth-child(odd),
+  .dashboard-stats > .stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+  }
+  .action-btn-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .action-btn-row .btn {
+    width: 100% !important;
+  }
   .product-grid, .admin-product-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
