@@ -40,6 +40,7 @@ outOfStockProducts:0
 const [invites,setInvites]=useState<any[]>([]);
 const [inviteUrl,setInviteUrl]=useState("");
 const [inviteError,setInviteError]=useState("");
+const [inviteLinkCopied,setInviteLinkCopied]=useState(false);
 
 const [currentPassword, setCurrentPassword] = useState("");
 const [newPassword, setNewPassword] = useState("");
@@ -988,13 +989,15 @@ readOnly
 
 className="table-btn"
 
-onClick={()=>
-navigator.clipboard.writeText(inviteUrl)
-}
+onClick={()=>{
+navigator.clipboard.writeText(inviteUrl);
+setInviteLinkCopied(true);
+setTimeout(()=>setInviteLinkCopied(false), 2000);
+}}
 
 >
 
-Copy Link
+{inviteLinkCopied ? "✓ Copied" : "Copy Link"}
 
 </button>
 
