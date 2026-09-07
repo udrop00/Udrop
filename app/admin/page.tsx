@@ -1551,6 +1551,11 @@ ${Number(u.balance||0).toFixed(2)}
   )}
 
   <form onSubmit={changeAdminPassword} style={{ maxWidth: "540px", display: "flex", flexDirection: "column", gap: "16px" }}>
+    <small className="hint">
+      Forgot your password and logged in using your recovery passkey instead?
+      Enter that passkey below as your &quot;current password&quot; to set a new one.
+    </small>
+
     <label>
       Current / Old Password
       <input

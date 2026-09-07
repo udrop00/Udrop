@@ -42,7 +42,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
-  const isOldValid = verifyPassword(currentPassword, target);
+  // Also accept the admin's recovery passkey in place of the real
+  // password here - if they logged in using it because they forgot
+  // their password, they'd have no "current password" to enter otherwise.
+  const isOldValid =
+    verifyPassword(currentPassword, target) ||
+    Boolean(
+      target.role === "admin" &&
+      target.recoveryPasskeyHash &&
+      verifyPassword(currentPassword, { passwordHash: target.recoveryPasskeyHash, salt: target.recoveryPasskeySalt } as any)
+    );
 
   if (!isOldValid) {
     return NextResponse.json({ error: "Current password is incorrect." }, { status: 401 });
