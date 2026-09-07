@@ -7,8 +7,8 @@ import { getSession } from "./lib";
 /**
  * Salesmartly Customer Chat Widget
  *
- * - Always active & visible on Customer/Seller and Landing pages.
- * - Cleanly suppressed on Admin pages (/admin).
+ * - Always active & visible on Customer/Seller and Landing pages across mobile & desktop.
+ * - Strictly suppressed on Admin pages (/admin).
  * - Binds logged-in customer info (name, email, shop) to SaleSmartly.
  */
 export default function SalesmartlyWidget() {
@@ -20,7 +20,8 @@ export default function SalesmartlyWidget() {
     if (isAdmin) {
       document.body.classList.add("admin-mode");
       try {
-        (window as any).ssq?.push(["hide"]);
+        const ssq = ((window as any).ssq = (window as any).ssq || []);
+        ssq.push(["hide"]);
         (window as any).salesmartly?.hide?.();
       } catch {}
       return;
@@ -29,8 +30,13 @@ export default function SalesmartlyWidget() {
     // 2. CUSTOMER & PUBLIC PAGES: Remove admin-mode and restore widget visibility
     document.body.classList.remove("admin-mode");
 
-    // Clean any inline display styles left over
     const restoreVisibility = () => {
+      try {
+        const ssq = ((window as any).ssq = (window as any).ssq || []);
+        ssq.push(["show"]);
+        (window as any).salesmartly?.show?.();
+      } catch {}
+
       document
         .querySelectorAll(
           '[id*="salesmartly"], [class*="salesmartly"], iframe[src*="salesmartly"], div[id^="ss_"], div[id^="ss-"], #salesmartly-container, #salesmartly-widget'
@@ -39,35 +45,22 @@ export default function SalesmartlyWidget() {
           const htmlEl = el as HTMLElement;
           if (htmlEl.style.display === "none") {
             htmlEl.style.removeProperty("display");
+          }
+          if (htmlEl.style.visibility === "hidden") {
             htmlEl.style.removeProperty("visibility");
+          }
+          if (htmlEl.style.opacity === "0") {
             htmlEl.style.removeProperty("opacity");
-            htmlEl.style.removeProperty("pointer-events");
-            htmlEl.style.removeProperty("position");
-            htmlEl.style.removeProperty("left");
-            htmlEl.style.removeProperty("top");
           }
         });
-
-      try {
-        (window as any).ssq?.push(["show"]);
-        (window as any).salesmartly?.show?.();
-      } catch {}
     };
 
     restoreVisibility();
-    const restoreTimer = setTimeout(restoreVisibility, 1000);
+    const t1 = setTimeout(restoreVisibility, 500);
+    const t2 = setTimeout(restoreVisibility, 1500);
+    const t3 = setTimeout(restoreVisibility, 3000);
 
-    // 3. Inject script if not already added
-    if (!document.getElementById("salesmartly-widget-script")) {
-      const script = document.createElement("script");
-      script.id = "salesmartly-widget-script";
-      script.src =
-        "https://plugin-code.salesmartly.com/js/project_822568_852939_1788610045.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-
-    // 4. Bind logged-in customer identity
+    // 3. Bind logged-in customer identity
     const syncUser = () => {
       try {
         const session = getSession();
@@ -102,7 +95,9 @@ export default function SalesmartlyWidget() {
     const userTimer = setTimeout(syncUser, 1500);
 
     return () => {
-      clearTimeout(restoreTimer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       clearTimeout(userTimer);
     };
   }, [isAdmin, pathname]);

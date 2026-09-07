@@ -484,7 +484,19 @@ const[profileImage,setProfileImage]=useState("");
 const [sellerRating,setSellerRating]=useState(0);
 const[loading,setLoading]=useState(true);
 
-const [sidebarOpen,setSidebarOpen] = useState(true);
+const [sidebarOpen,setSidebarOpen] = useState(false);
+
+useEffect(()=>{
+  if(typeof window !== "undefined" && window.innerWidth > 900){
+    setSidebarOpen(true);
+  }
+},[]);
+
+useEffect(()=>{
+  if(typeof window !== "undefined" && window.innerWidth <= 900){
+    setSidebarOpen(false);
+  }
+},[pathname]);
 
 
 const unread=useUnreadCount();
@@ -572,7 +584,14 @@ Loading Ubuy…
 
 return (
 
-<div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+<div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
+
+{sidebarOpen && (
+  <div 
+    className="sidebar-backdrop"
+    onClick={() => setSidebarOpen(false)}
+  />
+)}
 
 <aside className="sidebar">
 
@@ -875,7 +894,19 @@ const router=useRouter();
 const[loading,setLoading]=useState(true);
 
 
-const [sidebarOpen,setSidebarOpen] = useState(true);
+const [sidebarOpen,setSidebarOpen] = useState(false);
+
+useEffect(()=>{
+  if(typeof window !== "undefined" && window.innerWidth > 900){
+    setSidebarOpen(true);
+  }
+},[]);
+
+useEffect(()=>{
+  if(typeof window !== "undefined" && window.innerWidth <= 900){
+    setSidebarOpen(false);
+  }
+},[pathname]);
 
 
 
@@ -969,7 +1000,14 @@ Loading Admin Control Center…
 
 return (
 
-<div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+<div className={`app-shell ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
+
+{sidebarOpen && (
+  <div 
+    className="sidebar-backdrop"
+    onClick={() => setSidebarOpen(false)}
+  />
+)}
 
 <aside className="sidebar">
 

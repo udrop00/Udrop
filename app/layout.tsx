@@ -50,6 +50,21 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/png" />
         <meta name="twitter:image" content="https://www.udropglobal.com/og-marketplace.png" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.ssq = window.ssq || [];
+              (function(d, src) {
+                var t = d.createElement('script');
+                t.id = 'salesmartly-widget-script';
+                t.async = true;
+                t.src = src;
+                var s = d.getElementsByTagName('script')[0] || d.head;
+                s.parentNode.insertBefore(t, s);
+              })(document, 'https://plugin-code.salesmartly.com/js/project_822568_852939_1788610045.js');
+            `
+          }}
+        />
       </head>
       <body>
         {children}
