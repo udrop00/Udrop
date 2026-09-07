@@ -34,7 +34,7 @@ export default function SalesmartlyWidget() {
 
       document
         .querySelectorAll(
-          '[id*="salesmartly"], [class*="salesmartly"], iframe[src*="salesmartly"], div[id^="ss_"], div[id^="ss-"], #salesmartly-container, #salesmartly-widget'
+          'salesmartly-chat-widget, [id*="salesmartly"], [class*="salesmartly"], iframe[src*="salesmartly"], div[id^="ss_"], div[id^="ss-"], #salesmartly-container, #salesmartly-widget'
         )
         .forEach((el) => {
           const htmlEl = el as HTMLElement;

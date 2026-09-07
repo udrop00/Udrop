@@ -2423,6 +2423,7 @@ margin-left:22px;
 }
 
 /* Strictly hide third-party chat widgets on Admin Pages */
+body.admin-mode salesmartly-chat-widget,
 body.admin-mode [id*="salesmartly"],
 body.admin-mode [class*="salesmartly"],
 body.admin-mode [id^="ss_"],
