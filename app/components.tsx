@@ -223,22 +223,30 @@ function NotificationBell() {
 
       {/* 2. LUXURY NOTIFICATION DROPDOWN */}
       {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50px",
-            right: "0",
-            width: "360px",
-            maxWidth: "calc(100vw - 32px)",
-            background: "rgba(13, 21, 39, 0.96)",
-            backdropFilter: "blur(25px)",
-            border: "1px solid rgba(56, 189, 248, 0.3)",
-            borderRadius: "18px",
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.15)",
-            zIndex: 99999,
-            overflow: "hidden"
-          }}
-        >
+        <>
+          <div 
+            style={{ position: "fixed", inset: 0, zIndex: 999998, background: "rgba(0,0,0,0.4)" }} 
+            onClick={() => setOpen(false)} 
+          />
+          <div
+            className="notification-dropdown-panel"
+            style={{
+              position: "fixed",
+              top: "70px",
+              left: "14px",
+              right: "14px",
+              width: "auto",
+              maxWidth: "380px",
+              margin: "0 auto",
+              background: "rgba(13, 21, 39, 0.98)",
+              backdropFilter: "blur(25px)",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              borderRadius: "18px",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.2)",
+              zIndex: 999999,
+              overflow: "hidden"
+            }}
+          >
           {/* Header */}
           <div
             style={{
@@ -372,6 +380,7 @@ function NotificationBell() {
             )}
           </div>
         </div>
+        </>
       )}
 
       {/* 3. FLOATING REAL-TIME TOAST POPUP (Slide-in) */}

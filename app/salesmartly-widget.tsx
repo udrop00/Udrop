@@ -19,11 +19,6 @@ export default function SalesmartlyWidget() {
     // 1. ADMIN PAGES: Add admin-mode class to body to hide chat widget via CSS
     if (isAdmin) {
       document.body.classList.add("admin-mode");
-      try {
-        const ssq = ((window as any).ssq = (window as any).ssq || []);
-        ssq.push(["hide"]);
-        (window as any).salesmartly?.hide?.();
-      } catch {}
       return;
     }
 
@@ -32,6 +27,9 @@ export default function SalesmartlyWidget() {
 
     const restoreVisibility = () => {
       try {
+        localStorage.removeItem("ss_widget_hide");
+        localStorage.removeItem("salesmartly_hide");
+        sessionStorage.removeItem("ss_widget_hide");
         const ssq = ((window as any).ssq = (window as any).ssq || []);
         ssq.push(["show"]);
         (window as any).salesmartly?.show?.();
