@@ -30,8 +30,11 @@ export default function SalesmartlyWidget() {
         localStorage.removeItem("ss_widget_hide");
         localStorage.removeItem("salesmartly_hide");
         sessionStorage.removeItem("ss_widget_hide");
-        const ssq = ((window as any).ssq = (window as any).ssq || []);
-        ssq.push(["show"]);
+        // Only push if the vendor script has already initialized window.ssq itself.
+        // Never pre-create it here: the vendor's own bootstrap script checks
+        // `if (window.ssq) return false` and skips loading the real widget
+        // if window.ssq already exists, which silently breaks the chat widget.
+        (window as any).ssq?.push?.(["show"]);
         (window as any).salesmartly?.show?.();
       } catch {}
 
@@ -65,7 +68,7 @@ export default function SalesmartlyWidget() {
         const user = session?.user;
 
         if (user && user.role !== "admin") {
-          const ssq = ((window as any).ssq = (window as any).ssq || []);
+          const ssq = (window as any).ssq;
           const identifier = {
             user_id: user.id,
             user_name: user.name || user.shopName || user.email,
@@ -83,20 +86,22 @@ export default function SalesmartlyWidget() {
             }
           };
 
-          ssq.push(["set", identifier]);
+          ssq?.push?.(["set", identifier]);
           (window as any).salesmartly?.set?.(identifier);
         }
       } catch {}
     };
 
     syncUser();
-    const userTimer = setTimeout(syncUser, 1500);
+    const userTimer1 = setTimeout(syncUser, 1500);
+    const userTimer2 = setTimeout(syncUser, 3000);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
-      clearTimeout(userTimer);
+      clearTimeout(userTimer1);
+      clearTimeout(userTimer2);
     };
   }, [isAdmin, pathname]);
 

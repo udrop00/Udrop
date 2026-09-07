@@ -54,13 +54,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         <Script
-          id="salesmartly-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `window.ssq = window.ssq || [];`
-          }}
-        />
-        <Script
           id="salesmartly-widget-script"
           src="https://plugin-code.salesmartly.com/js/project_822568_852939_1788610045.js"
           strategy="afterInteractive"
