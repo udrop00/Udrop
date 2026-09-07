@@ -24,18 +24,24 @@ export type AppUser = {
 
 const KEY = "dz_tab_session";
 
+// Uses localStorage (not sessionStorage) so the session survives tab
+// reloads/kills - mobile browsers frequently reload background tabs to
+// save memory, which would otherwise wipe sessionStorage and make it
+// look like the user got logged out (e.g. after pressing back) even
+// though their server-side session token is still valid for up to 30
+// days when "Remember me" was checked at login.
 export function saveSession(role: "customer" | "admin", user: AppUser, token: string) {
-  if (typeof window !== "undefined") sessionStorage.setItem(KEY, JSON.stringify({ role, user, token }));
+  if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify({ role, user, token }));
 }
 
 export function clearSession() {
-  if (typeof window !== "undefined") sessionStorage.removeItem(KEY);
+  if (typeof window !== "undefined") localStorage.removeItem(KEY);
 }
 
 export function getSession() {
   if (typeof window === "undefined") return null;
   try {
-    const raw = sessionStorage.getItem(KEY);
+    const raw = localStorage.getItem(KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;

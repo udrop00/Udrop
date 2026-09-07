@@ -924,7 +924,7 @@ useEffect(()=>{
 
 useEffect(()=>{
 
-const session = sessionStorage.getItem("dz_tab_session");
+const session = localStorage.getItem("dz_tab_session");
 
 if(!session){
 

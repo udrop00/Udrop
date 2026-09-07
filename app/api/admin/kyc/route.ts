@@ -25,6 +25,29 @@ export async function GET(req: Request){
   const url = new URL(req.url);
 
 const status = url.searchParams.get("status") || "pending";
+const userId = url.searchParams.get("userId");
+
+// Single applicant lookup - includes the (potentially large, base64)
+// document images. Used by the admin UI to lazy-load documents only
+// when a specific application is opened, instead of on every list load.
+if(userId){
+
+  const u = db.users.find(
+    (x:any)=>x.id===userId && x.role==="customer"
+  );
+
+  if(!u){
+    return NextResponse.json(
+      {error:"User not found"},
+      {status:404}
+    );
+  }
+
+  return NextResponse.json({
+    documents:u.kycDocuments || []
+  });
+
+}
 
 
 const applications = db.users
@@ -63,7 +86,7 @@ const applications = db.users
 
       kycStatus:u.kycStatus || "Pending",
 
-      documents:u.kycDocuments || []
+      documentCount:(u.kycDocuments || []).length
 
     }));
 

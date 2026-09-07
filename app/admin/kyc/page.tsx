@@ -11,6 +11,9 @@ export default function AdminKyc(){
   const [loading,setLoading] = useState(true);
   const [tab,setTab] = useState("pending");
   const [preview,setPreview] = useState("");
+  const [expanded,setExpanded] = useState<string>("");
+  const [documentsById,setDocumentsById] = useState<Record<string,any[]>>({});
+  const [loadingDocsFor,setLoadingDocsFor] = useState("");
 
   const load = useCallback(async()=>{
     try {
@@ -31,6 +34,30 @@ export default function AdminKyc(){
   });
 
 
+
+
+  const toggleDocuments = async(userId:string)=>{
+
+    if(expanded===userId){
+      setExpanded("");
+      return;
+    }
+
+    setExpanded(userId);
+
+    if(documentsById[userId]) return;
+
+    setLoadingDocsFor(userId);
+
+    try {
+      const r = await apiFetch(`/api/admin/kyc?userId=${userId}`, { cache:"no-store" });
+      const d = await r.json();
+      setDocumentsById(prev=>({ ...prev, [userId]: d.documents || [] }));
+    } catch {} finally {
+      setLoadingDocsFor("");
+    }
+
+  };
 
 
   const updateKyc = async(
@@ -162,82 +189,102 @@ export default function AdminKyc(){
 
 
 
+            <button
+              className="btn btn-small btn-ghost"
+              style={{marginTop:12}}
+              onClick={()=>toggleDocuments(u.id)}
+            >
+              {expanded===u.id ? "Hide Documents" : `View Documents (${u.documentCount})`}
+            </button>
+
             {
-              u.documents?.map((doc:any,index:number)=>(
+              expanded===u.id && (
 
-                <div key={index}>
+                loadingDocsFor===u.id ? (
 
-                  <h4>
-                    {doc.certificateType}
-                  </h4>
+                  <p style={{marginTop:12}}>Loading documents...</p>
 
+                ) : (
 
-                  <div className="kyc-images">
+                  documentsById[u.id]?.map((doc:any,index:number)=>(
 
+                    <div key={index}>
 
-{
-  doc.certificateFront &&
-
-  <div className="kyc-document-card">
-
-    <span>ID Front</span>
-
-    <img
-      src={doc.certificateFront}
-      alt="Front"
-      onClick={()=>setPreview(doc.certificateFront)}
-    />
-
-  </div>
-
-}
+                      <h4>
+                        {doc.certificateType}
+                      </h4>
 
 
+                      <div className="kyc-images">
 
-{
-  doc.certificateBack &&
 
-  <div className="kyc-document-card">
+    {
+      doc.certificateFront &&
 
-    <span>ID Back</span>
+      <div className="kyc-document-card">
 
-    <img
-      src={doc.certificateBack}
-      alt="Back"
-      onClick={()=>setPreview(doc.certificateBack)}
-    />
+        <span>ID Front</span>
 
-  </div>
+        <img
+          src={doc.certificateFront}
+          alt="Front"
+          onClick={()=>setPreview(doc.certificateFront)}
+        />
 
-}
+      </div>
+
+    }
 
 
 
-{
-  doc.selfie &&
+    {
+      doc.certificateBack &&
 
-  <div className="kyc-document-card">
+      <div className="kyc-document-card">
 
-    <span>Selfie Verification</span>
+        <span>ID Back</span>
 
-    <img
-      src={doc.selfie}
-      alt="Selfie"
-      onClick={()=>setPreview(doc.selfie)}
-    />
+        <img
+          src={doc.certificateBack}
+          alt="Back"
+          onClick={()=>setPreview(doc.certificateBack)}
+        />
 
-  </div>
+      </div>
 
-}
-
-
-
-</div>
+    }
 
 
-                </div>
 
-              ))
+    {
+      doc.selfie &&
+
+      <div className="kyc-document-card">
+
+        <span>Selfie Verification</span>
+
+        <img
+          src={doc.selfie}
+          alt="Selfie"
+          onClick={()=>setPreview(doc.selfie)}
+        />
+
+      </div>
+
+    }
+
+
+
+    </div>
+
+
+                    </div>
+
+                  ))
+
+                )
+
+              )
             }
 
 
