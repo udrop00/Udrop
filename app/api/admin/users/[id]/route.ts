@@ -7,6 +7,7 @@ import {
   logActivity,
   hashPassword
 } from "../../../../lib/server";
+import { verifyTOTP } from "../../../../lib/totp";
 
 export const runtime="nodejs";
 
@@ -212,6 +213,37 @@ export async function PATCH(
           status: 400
         }
       );
+    }
+
+    // Require the admin's own Google Authenticator code for this
+    // sensitive action, so a hijacked/stolen admin session alone
+    // isn't enough to take over another user's account.
+    if(admin.twoFactorEnabled && admin.twoFactorSecret){
+
+      const twoFactorCode = String(body.twoFactorCode || "").trim();
+
+      if(!twoFactorCode){
+        return NextResponse.json(
+          {
+            error: "Enter your 6-digit Google Authenticator code to confirm this password reset."
+          },
+          {
+            status: 400
+          }
+        );
+      }
+
+      if(!verifyTOTP(twoFactorCode, admin.twoFactorSecret)){
+        return NextResponse.json(
+          {
+            error: "Invalid 6-digit Authenticator code."
+          },
+          {
+            status: 400
+          }
+        );
+      }
+
     }
 
     const {salt,hash} = hashPassword(body.newPassword);

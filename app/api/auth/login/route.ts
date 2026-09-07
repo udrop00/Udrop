@@ -31,26 +31,41 @@ export async function POST(req: Request) {
     // 1. ADMIN LOGIN
     if (isAdminAttempt) {
       let admin: any = db.users.find((u: any) => u.role === "admin");
-      const isValid =
-        (admin && admin.passwordHash && verifyPassword(pwd, admin)) ||
-        pwd === "Admin@123" ||
-        pwd === "admin@ubuy" ||
-        pwd === "admin123" ||
-        pwd === "admin" ||
-        pwd === "admin@dropzone.com";
+
+      // First-time setup only: no admin account exists yet in the database.
+      // Bootstraps a default admin using a fixed credential so the panel
+      // isn't permanently locked out on a fresh install. Once this account
+      // is created, this branch never runs again - login is then verified
+      // solely against that account's real (changeable) password.
+      const bootstrapAdmin = {
+        id: "admin-001",
+        name: "Drop Zone Admin",
+        email: "admin@dropzone.com",
+        passwordHash: "a93f776539bec0aa7af135520bd12df97322ac57a24eadbee2aa2b4438d4e62db483a257d62079a24a80192726d292b349c9ab2f3c6f5a9d8941d7dd15417022",
+        salt: "03b5cd8a9748e0b32368de7722cb7390",
+        role: "admin" as const,
+        status: "Active" as const,
+        createdAt: new Date().toISOString()
+      };
+
+      const passwordMatches =
+        admin
+          ? Boolean(admin.passwordHash && verifyPassword(pwd, admin))
+          : verifyPassword(pwd, bootstrapAdmin);
+
+      // Recovery passkey lets the admin log in if they forgot their real
+      // password (generated from Admin Settings; shown to them only once).
+      const usedRecoveryPasskey =
+        !passwordMatches &&
+        admin &&
+        admin.recoveryPasskeyHash &&
+        verifyPassword(pwd, { passwordHash: admin.recoveryPasskeyHash, salt: admin.recoveryPasskeySalt } as any);
+
+      const isValid = passwordMatches || usedRecoveryPasskey;
 
       if (isValid) {
         if (!admin) {
-          admin = {
-            id: "admin-001",
-            name: "Drop Zone Admin",
-            email: "admin@dropzone.com",
-            passwordHash: "a93f776539bec0aa7af135520bd12df97322ac57a24eadbee2aa2b4438d4e62db483a257d62079a24a80192726d292b349c9ab2f3c6f5a9d8941d7dd15417022",
-            salt: "03b5cd8a9748e0b32368de7722cb7390",
-            role: "admin",
-            status: "Active",
-            createdAt: new Date().toISOString()
-          };
+          admin = bootstrapAdmin;
           db.users.unshift(admin);
         }
 
@@ -75,7 +90,14 @@ export async function POST(req: Request) {
         }
         
         const token = newSession(db, admin.id, 30);
-        try { logActivity(db, admin.id, "LOGIN", "Admin signed in"); } catch {}
+        try {
+          logActivity(
+            db,
+            admin.id,
+            "LOGIN",
+            usedRecoveryPasskey ? "Admin signed in using recovery passkey" : "Admin signed in"
+          );
+        } catch {}
         writeDB(db);
 
         return NextResponse.json({
@@ -94,7 +116,7 @@ export async function POST(req: Request) {
 
     if (!user || !verifyPassword(pwd, user)) {
       return NextResponse.json(
-        { error: "Invalid email or password." },
+        { error: "Invalid email or password. If you forgot your password, please contact support via Live Chat." },
         { status: 401 }
       );
     }

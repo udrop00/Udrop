@@ -86,9 +86,26 @@ const applications = db.users
 
       kycStatus:u.kycStatus || "Pending",
 
-      documentCount:(u.kycDocuments || []).length
+      documentCount:(u.kycDocuments || []).length,
 
-    }));
+      createdAt:u.createdAt,
+
+      kycProcessedAt:u.kycProcessedAt
+
+    }))
+    .sort((a:any,b:any)=>{
+
+      const aTime = new Date(
+        (status==="pending" ? a.createdAt : (a.kycProcessedAt || a.createdAt)) || 0
+      ).getTime();
+
+      const bTime = new Date(
+        (status==="pending" ? b.createdAt : (b.kycProcessedAt || b.createdAt)) || 0
+      ).getTime();
+
+      return bTime - aTime;
+
+    });
 
 
   return NextResponse.json({
@@ -146,6 +163,7 @@ export async function PATCH(req:Request){
 
     user.kycStatus="Approved";
     user.status="Active";
+    user.kycProcessedAt=new Date().toISOString();
 
 
     // Default Silver Package Activation
@@ -188,6 +206,7 @@ export async function PATCH(req:Request){
   if(action==="reject"){
 
     user.kycStatus="Rejected";
+    user.kycProcessedAt=new Date().toISOString();
 
 
     logActivity(

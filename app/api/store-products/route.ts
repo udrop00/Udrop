@@ -28,6 +28,11 @@ export async function GET(req: Request) {
   const sellerProducts = (db.sellerProducts || [])
     .filter(
       (p: any) => p.sellerId === user.id
+    )
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.addedDate || 0).getTime() -
+        new Date(a.addedDate || 0).getTime()
     );
 
   const products = sellerProducts.map((item: any) => {

@@ -28,9 +28,15 @@ export async function GET(req:Request){
   const db = readDB();
   if(!db.sellerProducts) db.sellerProducts = [];
 
-  const items = db.sellerProducts.filter(
-    (p:any)=>p.sellerId === user.id
-  );
+  const items = db.sellerProducts
+    .filter(
+      (p:any)=>p.sellerId === user.id
+    )
+    .sort(
+      (a:any,b:any)=>
+        new Date(b.addedDate || 0).getTime() -
+        new Date(a.addedDate || 0).getTime()
+    );
 
   const products = items.map((item:any)=>{
     const product = (db.products || []).find(

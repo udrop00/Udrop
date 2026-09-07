@@ -42,8 +42,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
-  const isOldValid = verifyPassword(currentPassword, target) ||
-    (target.role === "admin" && (currentPassword === "admin@ubuy" || currentPassword === "admin123" || currentPassword === "admin"));
+  const isOldValid = verifyPassword(currentPassword, target);
 
   if (!isOldValid) {
     return NextResponse.json({ error: "Current password is incorrect." }, { status: 401 });

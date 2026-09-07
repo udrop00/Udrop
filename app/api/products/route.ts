@@ -16,9 +16,15 @@ export async function GET() {
     writeDB(db);
   }
 
+  const products = [...db.products].sort(
+    (a: any, b: any) =>
+      new Date(b.createdAt || 0).getTime() -
+      new Date(a.createdAt || 0).getTime()
+  );
+
   return NextResponse.json(
     {
-      products: db.products
+      products
     },
     {
       headers:{

@@ -64,6 +64,15 @@ const [resetCode, setResetCode] = useState("");
 const [resetLoading, setResetLoading] = useState(false);
 const [resetError, setResetError] = useState("");
 
+// Recovery Passkey States
+const [passkeyExists, setPasskeyExists] = useState(false);
+const [showGeneratePasskey, setShowGeneratePasskey] = useState(false);
+const [passkeyPassword, setPasskeyPassword] = useState("");
+const [passkeyTwoFactorCode, setPasskeyTwoFactorCode] = useState("");
+const [passkeyLoading, setPasskeyLoading] = useState(false);
+const [passkeyError, setPasskeyError] = useState("");
+const [generatedPasskey, setGeneratedPasskey] = useState("");
+
 const load2FAStatus = useCallback(async () => {
   try {
     const res = await apiFetch("/api/admin/2fa", { cache: "no-store" });
@@ -77,6 +86,48 @@ const load2FAStatus = useCallback(async () => {
     }
   } catch {}
 }, []);
+
+const loadPasskeyStatus = useCallback(async () => {
+  try {
+    const res = await apiFetch("/api/admin/recovery-passkey", { cache: "no-store" });
+    const d = await res.json();
+    if (res.ok) {
+      setPasskeyExists(Boolean(d.exists));
+    }
+  } catch {}
+}, []);
+
+const generatePasskey = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setPasskeyError("");
+
+  if (!passkeyPassword) {
+    setPasskeyError("Please enter your current password.");
+    return;
+  }
+
+  setPasskeyLoading(true);
+  try {
+    const res = await apiFetch("/api/admin/recovery-passkey", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: passkeyPassword, twoFactorCode: passkeyTwoFactorCode })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      setGeneratedPasskey(d.passkey);
+      setPasskeyExists(true);
+      setPasskeyPassword("");
+      setPasskeyTwoFactorCode("");
+    } else {
+      setPasskeyError(d.error || "Unable to generate passkey.");
+    }
+  } catch {
+    setPasskeyError("Unable to generate passkey.");
+  } finally {
+    setPasskeyLoading(false);
+  }
+};
 
 const startSetup2FA = async () => {
   setTwoFactorError("");
@@ -241,7 +292,8 @@ useEffect(()=>{
 load();
 loadInvites();
 load2FAStatus();
-},[load, load2FAStatus]);
+loadPasskeyStatus();
+},[load, load2FAStatus, loadPasskeyStatus]);
 
 useRealtimeStream(()=>{
 load();
@@ -1559,6 +1611,107 @@ ${Number(u.balance||0).toFixed(2)}
       </button>
     </div>
   </form>
+</section>
+
+<section className="panel" style={{ marginTop: "24px" }}>
+  <div className="panel-head">
+    <div>
+      <span className="eyebrow">Security & Credentials</span>
+      <h2>Recovery Passkey</h2>
+    </div>
+  </div>
+
+  <p>
+    A one-time recovery key you can use to log in if you ever forget
+    your password. {passkeyExists
+      ? "A passkey has already been generated for this account."
+      : "No passkey has been generated yet."}
+  </p>
+
+  {passkeyError && (
+    <div className="form-error" style={{ marginBottom: "16px" }}>
+      {passkeyError}
+    </div>
+  )}
+
+  {generatedPasskey ? (
+    <div className="info-banner" style={{ borderLeft: "4px solid #10b981" }}>
+      <p style={{ marginTop: 0 }}>
+        <b>Save this passkey somewhere safe now — it will not be shown again:</b>
+      </p>
+      <div
+        style={{
+          fontFamily: "monospace",
+          fontSize: "16px",
+          fontWeight: 700,
+          letterSpacing: "1px",
+          wordBreak: "break-all",
+          background: "rgba(255,255,255,.04)",
+          border: "1px solid var(--line)",
+          borderRadius: "10px",
+          padding: "14px",
+          margin: "10px 0"
+        }}
+      >
+        {generatedPasskey}
+      </div>
+      <button
+        className="btn btn-small"
+        onClick={() => {
+          setGeneratedPasskey("");
+          setShowGeneratePasskey(false);
+        }}
+      >
+        Done, I've saved it
+      </button>
+    </div>
+  ) : showGeneratePasskey ? (
+    <form onSubmit={generatePasskey} style={{ maxWidth: "540px", display: "flex", flexDirection: "column", gap: "16px" }}>
+      <label>
+        Current Password
+        <input
+          type="password"
+          value={passkeyPassword}
+          onChange={(e) => setPasskeyPassword(e.target.value)}
+          placeholder="Enter current password"
+          required
+        />
+      </label>
+
+      {twoFactorEnabled && (
+        <label>
+          Google Authenticator Code (6-Digit)
+          <input
+            type="text"
+            maxLength={6}
+            inputMode="numeric"
+            value={passkeyTwoFactorCode}
+            onChange={(e) => setPasskeyTwoFactorCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            placeholder="Enter 6-digit code from app"
+            required
+            style={{ letterSpacing: "4px", fontWeight: 700 }}
+          />
+        </label>
+      )}
+
+      <div style={{ display: "flex", gap: "10px" }}>
+        <button type="submit" className="btn" disabled={passkeyLoading}>
+          {passkeyLoading ? "Generating..." : (passkeyExists ? "Regenerate Passkey" : "Generate Passkey")}
+        </button>
+        <button
+          type="button"
+          className="btn btn-small btn-ghost"
+          onClick={() => setShowGeneratePasskey(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  ) : (
+    <button className="btn" onClick={() => setShowGeneratePasskey(true)}>
+      {passkeyExists ? "Regenerate Passkey" : "Generate Passkey"}
+    </button>
+  )}
 </section>
 
 </AdminShell>

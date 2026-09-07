@@ -35,6 +35,7 @@ export default function UserDetail(){
 
   const [newPassword,setNewPassword]=useState("");
   const [confirmNewPassword,setConfirmNewPassword]=useState("");
+  const [resetTwoFactorCode,setResetTwoFactorCode]=useState("");
   const [resettingPassword,setResettingPassword]=useState(false);
 
   const [message,setMessage]=useState("");
@@ -352,7 +353,7 @@ else{
       const r = await apiFetch(`/api/admin/users/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newPassword })
+        body: JSON.stringify({ newPassword, twoFactorCode: resetTwoFactorCode })
       });
 
       const d = await r.json();
@@ -360,6 +361,7 @@ else{
       if (r.ok) {
         setNewPassword("");
         setConfirmNewPassword("");
+        setResetTwoFactorCode("");
         setMessage(`Password reset successfully. New password: ${newPassword}`);
       } else {
         setMessage(d.error || "Unable to reset password.");
@@ -942,6 +944,15 @@ else{
             placeholder="Confirm new password"
           />
 
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={resetTwoFactorCode}
+            onChange={e=>setResetTwoFactorCode(e.target.value)}
+            placeholder="Your 6-digit Authenticator code"
+          />
+
           <button
             className="btn"
             onClick={resetPassword}
@@ -950,6 +961,12 @@ else{
             {resettingPassword ? "Resetting..." : "Reset Password"}
           </button>
         </div>
+
+        <small className="hint">
+          Requires your own Google Authenticator code to confirm, so a
+          stolen admin session alone can't be used to take over another
+          user's account.
+        </small>
 
       </section>
 
