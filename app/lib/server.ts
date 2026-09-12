@@ -9,6 +9,70 @@ type Conversation = { id:string; customerId:string; status:"open"|"closed"; upda
 type Invite = { id:string; token:string; createdBy:string; createdAt:string; expiresAt:number; usedAt?:string; usedBy?:string; revokedAt?:string };
 type DB = { users:User[]; sessions:Record<string,{userId:string;expiresAt:number}>; activity:{id:string;userId:string;action:string;description:string;createdAt:string}[]; conversations:Conversation[]; messages:Message[]; invites:Invite[]; products:any[]; orders:any[]; packages:any[]; packageRequests:any[]; withdrawals:any[]; [key:string]:any };
 
+// Keyword rules used to infer a category for any product that doesn't
+// already have one, based on its name. Checked in order — first match wins.
+const CATEGORY_RULES: { category: string; keywords: string[] }[] = [
+  { category: "Jewelry & Watches", keywords: ["ring", "necklace", "bracelet", "gold", "diamond", "carat", "chain", "earring", "pendant", "jewelry", "jewellery", "rolex", "gemstone"] },
+  { category: "Shoes & Footwear", keywords: ["shoe", "shoes", "sneaker", "oxford", "jordan", "cleat", "boot", "sandal"] },
+  { category: "Clothing & Apparel", keywords: ["shirt", "t-shirt", "jacket", "dress", "jeans", "hoodie", "sweater", "coat"] },
+  { category: "Audio & Home Theater", keywords: ["speaker", "audio", "home theater", "subwoofer", "amplifier", "headphone"] },
+  { category: "Electronics", keywords: ["laptop", "tablet", "projector", "camera", "smartphone", "computer", "monitor", "smart watch", "printer"] },
+  { category: "Tools & Hardware", keywords: ["drill", "cordless", "brushless", "wrench", "toolkit", "screwdriver"] },
+  { category: "Industrial Equipment", keywords: ["plc", "inverter", "ecu", "valve positioner", "controller", "servo", "actuator"] },
+  { category: "Furniture", keywords: ["chair", "office chair", "bed", "swing", "sofa", "desk", "toy chest", "recliner"] },
+  { category: "Home & Kitchen", keywords: ["dinnerware", "dispenser", "fryer", "dehydrator", "chafing", "cookware", "blender", "kitchen"] },
+  { category: "Sporting Goods", keywords: ["bike", "wheelset", "basketball", "bicycle", "fitness", "gym", "cycling"] },
+  { category: "Toys & Games", keywords: ["toy", "toys", "game"] },
+  { category: "Bags & Accessories", keywords: ["backpack", "handbag", "eyeglasses", "sunglasses", "wallet", "purse"] },
+  { category: "Musical Instruments", keywords: ["piano", "guitar", "violin", "instrument"] }
+];
+
+function inferCategory(name: string): string {
+  const lower = ` ${(name || "").toLowerCase()} `;
+  for (const rule of CATEGORY_RULES) {
+    if (rule.keywords.some((k) => lower.includes(k))) return rule.category;
+  }
+  return "General Merchandise";
+}
+
+// Fills in missing stock/category for products (once), then nudges every
+// product's stock up or down by a small random amount once per calendar
+// day so inventory doesn't sit static. Returns true if anything changed.
+function applyProductMaintenance(db: DB): boolean {
+  let changed = false;
+  const products: any[] = db.products || [];
+
+  if (!db.stockBackfilled) {
+    for (const p of products) {
+      if (!p.stock || p.stock === 0) {
+        p.stock = 1000 + Math.floor(Math.random() * 801); // 1000-1800
+        changed = true;
+      }
+    }
+    db.stockBackfilled = true;
+    changed = true;
+  }
+
+  for (const p of products) {
+    if (!p.category || p.category === "Uncategorized") {
+      p.category = inferCategory(p.name);
+      changed = true;
+    }
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  if (db.lastStockFluctuationDate !== today) {
+    for (const p of products) {
+      const delta = Math.floor(Math.random() * 801) - 400; // -400 to +400
+      p.stock = Math.max(0, Number(p.stock || 0) + delta);
+    }
+    db.lastStockFluctuationDate = today;
+    changed = true;
+  }
+
+  return changed;
+}
+
 let loggedDbFile = false;
 function getDbFile(): string {
   let resolved: string;
@@ -78,6 +142,10 @@ export function readDB():DB{
   // Ensure all 300 products are populated
   if (!db.products || db.products.length === 0) {
     db.products = DEFAULT_PRODUCTS;
+    writeDB(db);
+  }
+
+  if (applyProductMaintenance(db)) {
     writeDB(db);
   }
 

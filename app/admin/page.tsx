@@ -37,6 +37,61 @@ outOfStockProducts:0
 
 
 
+const [backupLoading, setBackupLoading] = useState(false);
+const [backupError, setBackupError] = useState("");
+const [showBackupCode, setShowBackupCode] = useState(false);
+const [backupTwoFactorCode, setBackupTwoFactorCode] = useState("");
+
+const requestBackup = () => {
+  setBackupError("");
+  if (twoFactorEnabled) {
+    setShowBackupCode(true);
+    return;
+  }
+  downloadBackup();
+};
+
+const cancelBackup = () => {
+  setShowBackupCode(false);
+  setBackupTwoFactorCode("");
+  setBackupError("");
+};
+
+const downloadBackup = async () => {
+  setBackupError("");
+  if (twoFactorEnabled && (!backupTwoFactorCode || backupTwoFactorCode.length !== 6)) {
+    setBackupError("Please enter your 6-digit Google Authenticator code.");
+    return;
+  }
+  setBackupLoading(true);
+  try {
+    const res = await apiFetch("/api/admin/backup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ twoFactorCode: twoFactorEnabled ? backupTwoFactorCode : undefined })
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(d.error || "Unable to download backup.");
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `udrop-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setShowBackupCode(false);
+    setBackupTwoFactorCode("");
+  } catch (err: any) {
+    setBackupError(err?.message || "Unable to download backup.");
+  } finally {
+    setBackupLoading(false);
+  }
+};
+
 const [invites,setInvites]=useState<any[]>([]);
 const [inviteUrl,setInviteUrl]=useState("");
 const [inviteError,setInviteError]=useState("");
@@ -49,6 +104,14 @@ const [pwdTwoFactorCode, setPwdTwoFactorCode] = useState("");
 const [pwdMessage, setPwdMessage] = useState("");
 const [pwdError, setPwdError] = useState("");
 const [pwdLoading, setPwdLoading] = useState(false);
+
+const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
+const [newEmail, setNewEmail] = useState("");
+const [confirmNewEmail, setConfirmNewEmail] = useState("");
+const [emailTwoFactorCode, setEmailTwoFactorCode] = useState("");
+const [emailMessage, setEmailMessage] = useState("");
+const [emailError, setEmailError] = useState("");
+const [emailLoading, setEmailLoading] = useState(false);
 
 // Google Authenticator (2FA) States
 const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -268,6 +331,51 @@ const changeAdminPassword = async (e: React.FormEvent) => {
   }
 };
 
+const changeAdminEmail = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setEmailMessage("");
+  setEmailError("");
+  if (!emailCurrentPassword || !newEmail || !confirmNewEmail) {
+    setEmailError("All fields are required.");
+    return;
+  }
+  if (newEmail !== confirmNewEmail) {
+    setEmailError("New email and confirm email do not match.");
+    return;
+  }
+  if (twoFactorEnabled && (!emailTwoFactorCode || emailTwoFactorCode.length !== 6)) {
+    setEmailError("Please enter your 6-digit Google Authenticator code.");
+    return;
+  }
+  setEmailLoading(true);
+  try {
+    const res = await apiFetch("/api/profile/change-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentPassword: emailCurrentPassword,
+        newEmail,
+        confirmEmail: confirmNewEmail,
+        twoFactorCode: twoFactorEnabled ? emailTwoFactorCode : undefined
+      })
+    });
+    const d = await res.json();
+    if (!res.ok) {
+      setEmailError(d.error || "Email update failed.");
+    } else {
+      setEmailMessage(`✓ Admin email has been changed to ${d.email}. Use this new email next time you sign in.`);
+      setEmailCurrentPassword("");
+      setNewEmail("");
+      setConfirmNewEmail("");
+      setEmailTwoFactorCode("");
+    }
+  } catch {
+    setEmailError("Failed to update email.");
+  } finally {
+    setEmailLoading(false);
+  }
+};
+
 
 const load = useCallback(()=>{
 
@@ -459,6 +567,8 @@ Business Control Center
 
 
 
+<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+
 <span className="admin-chip live-chip">
 
 <i/>
@@ -467,8 +577,46 @@ Live Database
 
 </span>
 
+{!showBackupCode ? (
+  <button
+    className="btn btn-small"
+    onClick={requestBackup}
+    disabled={backupLoading}
+    title="Download a full JSON backup of the site database"
+  >
+    {backupLoading ? "Preparing..." : "⬇ Download Backup"}
+  </button>
+) : (
+  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+    <input
+      type="text"
+      maxLength={6}
+      inputMode="numeric"
+      value={backupTwoFactorCode}
+      onChange={(e) => setBackupTwoFactorCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+      placeholder="6-digit code"
+      style={{ width: "120px", letterSpacing: "3px", fontWeight: 700 }}
+      autoFocus
+    />
+    <button className="btn btn-small" onClick={downloadBackup} disabled={backupLoading}>
+      {backupLoading ? "Verifying..." : "Confirm"}
+    </button>
+    <button className="btn btn-small btn-ghost" onClick={cancelBackup} disabled={backupLoading}>
+      Cancel
+    </button>
+  </div>
+)}
 
 </div>
+
+
+</div>
+
+{backupError && (
+  <div className="form-error" style={{ marginTop: "12px" }}>
+    {backupError}
+  </div>
+)}
 
 
 
@@ -1653,6 +1801,94 @@ ${Number(u.balance||0).toFixed(2)}
         style={{ minWidth: "160px" }}
       >
         {pwdLoading ? "Updating..." : "Update Password"}
+      </button>
+    </div>
+  </form>
+</section>
+
+<section className="panel" style={{ marginTop: "24px" }}>
+  <div className="panel-head">
+    <div>
+      <span className="eyebrow">Security & Credentials</span>
+      <h2>Change Admin Email</h2>
+    </div>
+  </div>
+
+  {emailMessage && (
+    <div className="info-banner" style={{ borderLeft: "4px solid #10b981", color: "#10b981", background: "rgba(16, 185, 129, 0.1)" }}>
+      <b>Success:</b> {emailMessage}
+    </div>
+  )}
+
+  {emailError && (
+    <div className="form-error" style={{ marginBottom: "16px" }}>
+      {emailError}
+    </div>
+  )}
+
+  <form onSubmit={changeAdminEmail} style={{ maxWidth: "540px", display: "flex", flexDirection: "column", gap: "16px" }}>
+    <small className="hint">
+      Forgot your password and logged in using your recovery passkey instead?
+      Enter that passkey below as your &quot;current password&quot; to confirm this change.
+    </small>
+
+    <label>
+      Current Password
+      <input
+        type="password"
+        value={emailCurrentPassword}
+        onChange={(e) => setEmailCurrentPassword(e.target.value)}
+        placeholder="Enter current password"
+        required
+      />
+    </label>
+
+    <label>
+      New Email Address
+      <input
+        type="email"
+        value={newEmail}
+        onChange={(e) => setNewEmail(e.target.value)}
+        placeholder="Enter new email address"
+        required
+      />
+    </label>
+
+    <label>
+      Confirm New Email Address
+      <input
+        type="email"
+        value={confirmNewEmail}
+        onChange={(e) => setConfirmNewEmail(e.target.value)}
+        placeholder="Confirm new email address"
+        required
+      />
+    </label>
+
+    {twoFactorEnabled && (
+      <label>
+        Google Authenticator Code (6-Digit)
+        <input
+          type="text"
+          maxLength={6}
+          inputMode="numeric"
+          value={emailTwoFactorCode}
+          onChange={(e) => setEmailTwoFactorCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          placeholder="Enter 6-digit code from app"
+          required
+          style={{ letterSpacing: "4px", fontWeight: 700 }}
+        />
+      </label>
+    )}
+
+    <div style={{ marginTop: "8px" }}>
+      <button
+        type="submit"
+        className="btn"
+        disabled={emailLoading}
+        style={{ minWidth: "160px" }}
+      >
+        {emailLoading ? "Updating..." : "Update Email"}
       </button>
     </div>
   </form>
