@@ -20,17 +20,20 @@ export async function POST(req: Request) {
     const db = readDB();
     if (!db.users) db.users = [];
 
+    const existingAdmin = db.users.find((u: any) => u.role === "admin");
+
     const isAdminAttempt =
       input === "admin" ||
       input === "admin@dropzone.com" ||
       input === "admin@udropglobal.com" ||
       input === "admin@ubuy" ||
       input === "admin@ubuy.com" ||
-      input === "admin@admin.com";
+      input === "admin@admin.com" ||
+      Boolean(existingAdmin && existingAdmin.email && existingAdmin.email.toLowerCase() === input);
 
     // 1. ADMIN LOGIN
     if (isAdminAttempt) {
-      let admin: any = db.users.find((u: any) => u.role === "admin");
+      let admin: any = existingAdmin;
 
       // First-time setup only: no admin account exists yet in the database.
       // Bootstraps a default admin using a fixed credential so the panel
