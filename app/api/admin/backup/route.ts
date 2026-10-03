@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readDB, writeDB, userFromRequest, logActivity } from "../../../lib/server";
+import { readDB, writeDB, userFromRequest, logActivity, getKycDocuments } from "../../../lib/server";
 
 export const runtime = "nodejs";
 
@@ -38,7 +38,15 @@ export async function POST(req: Request) {
 
   const filename = `udrop-backup-${new Date().toISOString().slice(0, 10)}.json`;
 
-  return new NextResponse(JSON.stringify(db, null, 2), {
+  const full = {
+    ...db,
+    users: db.users.map((u: any) => {
+      const docs = getKycDocuments(u.id);
+      return docs.length ? { ...u, kycDocuments: docs } : u;
+    })
+  };
+
+  return new NextResponse(JSON.stringify(full), {
     headers: {
       "Content-Type": "application/json",
       "Content-Disposition": `attachment; filename="${filename}"`

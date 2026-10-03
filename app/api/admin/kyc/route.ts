@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readDB, writeDB, userFromRequest, logActivity } from "../../../lib/server";
+import { readDB, writeDB, userFromRequest, logActivity, getKycDocuments, setKycDocuments } from "../../../lib/server";
 import { addNotification } from "../../../lib/notifications";
 import crypto from "node:crypto";
 
@@ -44,7 +44,7 @@ if(userId){
   }
 
   return NextResponse.json({
-    documents:u.kycDocuments || []
+    documents:getKycDocuments(u.id)
   });
 
 }
@@ -88,7 +88,7 @@ const applications = db.users
 
       kycStatus:u.kycStatus || "Pending",
 
-      documentCount:(u.kycDocuments || []).length,
+      documentCount:Number(u.kycDocumentCount || 0),
 
       createdAt:u.createdAt,
 
@@ -274,7 +274,8 @@ export async function DELETE(req: Request){
     );
   }
 
-  user.kycDocuments = [];
+  setKycDocuments(user.id, []);
+  user.kycDocumentCount = 0;
   user.kycHiddenFromHistory = true;
 
   logActivity(db, admin.id, "KYC_HISTORY_DELETED", `Removed KYC history entry for ${user.email}`);

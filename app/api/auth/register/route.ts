@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { readDB, writeDB, hashPassword, logActivity, newSession, safeUser } from "../../../lib/server";
+import { readDB, writeDB, hashPassword, logActivity, newSession, safeUser, setKycDocuments } from "../../../lib/server";
 import { getCountry, getCountryByCode } from "../../../countries";
 
 export const runtime = "nodejs";
@@ -109,14 +109,7 @@ export async function POST(req: Request) {
 
 kycStatus: "Pending",
 
-kycDocuments: [
-  {
-    certificateType,
-    certificateFront,
-    certificateBack,
-    selfie
-  }
-],
+kycDocumentCount: 1,
 
       currentPackage: "silver",
       currentPackageName: "Silver",
@@ -140,6 +133,10 @@ kycDocuments: [
       balance: 0,
       profit: 0
     };
+
+    setKycDocuments(user.id, [
+      { certificateType, certificateFront, certificateBack, selfie }
+    ]);
 
     db.users.push(user);
 

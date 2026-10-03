@@ -171,10 +171,62 @@ function ensure(){
 let globalDBRevision = Date.now();
 export function getDBRevision(){ return globalDBRevision; }
 export function touchDBRevision(){ globalDBRevision = Date.now(); }
+// KYC document images are large base64 blobs. Keeping them inside db.json made
+// every request parse tens of MB, so they live in their own per-user files.
+function kycFile(userId: string): string {
+  const safe = String(userId).replace(/[^a-zA-Z0-9_-]/g, "");
+  return path.join(path.dirname(getDbFile()), "kyc", `${safe}.json`);
+}
+
+export function getKycDocuments(userId: string): any[] {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(kycFile(userId), "utf8"));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function setKycDocuments(userId: string, docs: any[]): void {
+  const file = kycFile(userId);
+  if (!docs || docs.length === 0) {
+    try { fs.unlinkSync(file); } catch {}
+    return;
+  }
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(docs));
+}
+
+// One-time move of any embedded kycDocuments into per-user files. Files are
+// written first; db.json is only rewritten after every file succeeded, and the
+// original is kept as db.pre-kyc-split.json.
+function migrateKycDocuments(db: DB, dbFile: string): void {
+  const backup = path.join(path.dirname(dbFile), "db.pre-kyc-split.json");
+  if (!fs.existsSync(backup)) fs.copyFileSync(dbFile, backup);
+
+  for (const u of db.users as any[]) {
+    if (!u || !Object.prototype.hasOwnProperty.call(u, "kycDocuments")) continue;
+    const docs = Array.isArray(u.kycDocuments) ? u.kycDocuments : [];
+    if (docs.length > 0) {
+      setKycDocuments(u.id, docs);
+      if (getKycDocuments(u.id).length !== docs.length) {
+        throw new Error(`KYC migration check failed for user ${u.id}`);
+      }
+    }
+    u.kycDocumentCount = docs.length;
+    delete u.kycDocuments;
+  }
+
+  writeDB(db);
+}
+
 export function readDB():DB{
   ensure();
   const dbFile = getDbFile();
   let db:DB=JSON.parse(fs.readFileSync(dbFile,"utf8"));
+  if (Array.isArray(db.users) && db.users.some((u:any)=>u && Object.prototype.hasOwnProperty.call(u,"kycDocuments"))) {
+    migrateKycDocuments(db, dbFile);
+  }
   if(!db.users) db.users=[];
   if(!db.invites) db.invites=[];
   if(!db.products) db.products=[];
