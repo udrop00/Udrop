@@ -26,19 +26,19 @@ export const metadata: Metadata = {
     siteName: "Udrop Global",
     images: [
       {
-        url: "https://www.udropglobal.com/og-marketplace.png",
-        width: 1200,
-        height: 630,
+        url: "https://www.udropglobal.com/og-udrop.png",
+        width: 256,
+        height: 256,
         alt: "Udrop Global Marketplace"
       }
     ],
     type: "website"
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Udrop - Global Marketplace",
     description: "Udrop Global Marketplace",
-    images: ["https://www.udropglobal.com/og-marketplace.png"]
+    images: ["https://www.udropglobal.com/og-udrop.png"]
   }
 };
 
@@ -46,11 +46,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
-        <meta property="og:image" content="https://www.udropglobal.com/og-marketplace.png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        <meta property="og:image" content="https://www.udropglobal.com/og-udrop.png" />
+        <meta property="og:image:width" content="256" />
+        <meta property="og:image:height" content="256" />
         <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:image" content="https://www.udropglobal.com/og-marketplace.png" />
+        <meta name="twitter:image" content="https://www.udropglobal.com/og-udrop.png" />
       </head>
       <body>
         <Script

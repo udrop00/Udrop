@@ -766,12 +766,9 @@ onClick={logout}
 
     <div className="brand-row">
 
-  <a
-  href="https://www.google.com/aclk?sa=L&pf=1&ai=DChsSEwiRu_nh6LmWAxUYaUECHcDSMJoYACICCAEQBRoCd3M&co=1&ase=2&gclid=Cj0KCQjw16_UBhCqARIsAIdOaXxHbxoCyvRJM8xxU8tHKLjLZEM1eqRjs5-Xby2Rtg1Z-xIPSzHZSxEaAnz5EALw_wcB&sph=&cid=CAASuwHkaNuRJtWDEIFbsINJpQ0EcL3OypD-L0v3GK1YSSTsAcG-R1F4LTDz4FVnYNDSzZ4c06XJUOG5N0RmWU95igoOVtLaKayRbXJbcrmtMMsQRu3XX0QPF643dMMIkcc320yCfmNsFfXoKj2ndp8PY1B6uF27Nt1t_WJ_D19wEu28SMuFkgqNiio0q9hRfgxoYD9RAw55G1FwFQo60bq0SapFEwW7n-sNd0AIvlxHZw0HG0g2HMFk1xYKboeg&cce=2&category=acrcp_v1_32&sig=AOD64_0CWc2m3fAd_V33TNSTpG57RMk0yg&nis=4&ved=2ahUKEwi5gvPh6LmWAxUISaQEHWRfCOwQqyQoAXoECAwQDw&adurl=https://www.global.ubuy.com/%3Fcampaign_source%3Dgoogleads%26campaign_medium%3DSEA%26campaign_name%3DSEA_1_GGL_20_brand_UGL_3_EN_5_IN_USD_1_3_Low_Countries%26campaignid%3D24114281488%26gad_source%3D1%26gad_campaignid%3D24114281488%26gbraid%3D0AAAABAKZZAU0VSqkwOrKe4biM_QMHIvJQ%26gclid%3DCj0KCQjw16_UBhCqARIsAIdOaXxHbxoCyvRJM8xxU8tHKLjLZEM1eqRjs5-Xby2Rtg1Z-xIPSzHZSxEaAnz5EALw_wcB"
-  target="_blank"
-  rel="noopener noreferrer"
+  <span
 className="dashboard-logo"
-style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoration: "none" }}
+style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoration: "none", cursor: "default" }}
 >
   <span className="globe-icon" style={{ fontSize: "24px", lineHeight: 1 }}>🌐</span>
   <span className="dashboard-logo-text" style={{ fontWeight: 900, letterSpacing: "0.5px", fontSize: "19px" }}>
@@ -782,7 +779,7 @@ style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoratio
       textShadow: "0 0 12px rgba(255, 194, 32, 0.45)" 
     }}>buy</span>
   </span>
-</a>
+</span>
 
 
   <div className="seller-rating" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>

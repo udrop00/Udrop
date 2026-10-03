@@ -392,11 +392,35 @@ export async function GET(
   );
 
 
+  const catalog=new Map<string,any>(
+    (db.products||[]).map((p:any)=>[String(p.id),p])
+  );
+
+  const storeProducts=(db.sellerProducts||[])
+    .filter((sp:any)=>sp.sellerId===id)
+    .map((sp:any)=>{
+      const p=catalog.get(String(sp.productId));
+      return {
+        id:sp.id,
+        productId:sp.productId,
+        name:p?.name||"Removed product",
+        sku:p?.sku||"",
+        category:p?.category||"",
+        price:Number(p?.price||0),
+        image:p?.image||"",
+        status:sp.status||"Active",
+        addedDate:sp.addedDate||""
+      };
+    });
+
+
   return NextResponse.json({
 
     user:safeUser(user),
 
-    orders
+    orders,
+
+    storeProducts
 
   });
 

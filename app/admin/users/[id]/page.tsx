@@ -17,6 +17,7 @@ export default function UserDetail(){
 
   const [user,setUser]=useState<any>(null);
   const [orders,setOrders]=useState<any[]>([]);
+  const [storeProducts,setStoreProducts]=useState<any[]>([]);
   const [loading,setLoading]=useState(true);
 
   const [guaranteeMoney,setGuaranteeMoney]=useState("");
@@ -48,6 +49,7 @@ export default function UserDetail(){
       if(r.ok && d.user){
         setUser(d.user);
         setOrders(d.orders || []);
+        setStoreProducts(d.storeProducts || []);
         setGuaranteeMoney(String(Number(d.user?.guaranteeMoney || 0)));
         setSellerRating(String(Number(d.user?.sellerRating || 0)));
         setViewsMin(String(Number(d.user?.viewsMin ?? 0)));
@@ -604,6 +606,19 @@ else{
 
       <div className="stat-grid dashboard-stats">
 
+        <div className="stat">
+          <span>
+            Store Products
+          </span>
+          <strong>
+            {storeProducts.length}
+          </strong>
+          <small>
+            Added to store
+          </small>
+        </div>
+
+
 
 
         <div className="stat">
@@ -1130,6 +1145,62 @@ else{
             {savingViews ? "Saving..." : "Update Views Limit"}
           </button>
         </div>
+
+      </section>
+
+
+      <section className="panel">
+
+        <div className="panel-head">
+          <div>
+            <span className="eyebrow">
+              Store Products
+            </span>
+            <h2>
+              Products in Customer Store ({storeProducts.length})
+            </h2>
+          </div>
+        </div>
+
+        {storeProducts.length===0 ? (
+          <div className="empty-state">
+            No products added to this store yet.
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Added</th>
+                </tr>
+              </thead>
+              <tbody>
+                {storeProducts.map(sp=>(
+                  <tr key={sp.id}>
+                    <td>
+                      <div className="user-cell">
+                        {sp.image && (
+                          <img src={sp.image} alt="" style={{width:"36px",height:"36px",objectFit:"cover",borderRadius:"8px"}} />
+                        )}
+                        <b>{sp.name}</b>
+                      </div>
+                    </td>
+                    <td>{sp.sku || "-"}</td>
+                    <td>{sp.category || "-"}</td>
+                    <td>{"$"}{Number(sp.price||0).toFixed(2)}</td>
+                    <td>{sp.status}</td>
+                    <td>{sp.addedDate ? new Date(sp.addedDate).toLocaleDateString() : "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
       </section>
 

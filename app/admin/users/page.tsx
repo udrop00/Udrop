@@ -190,6 +190,7 @@ export default function Users() {
 
                 <th>User</th>
                 <th>Shop</th>
+                <th>Products</th>
                 <th>Contact</th>
                 <th>Role</th>
                 <th>Status</th>
@@ -252,6 +253,11 @@ export default function Users() {
 
                   <td>
                     {u.shopName || "-"}
+                  </td>
+
+
+                  <td>
+                    {Number((u as any).storeProductCount || 0)}
                   </td>
 
 

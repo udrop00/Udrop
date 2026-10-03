@@ -35,6 +35,59 @@ function inferCategory(name: string): string {
   return "General Merchandise";
 }
 
+const PRICE_LUXURY = ["cartier", "chanel", "bottega", "louis", "vuitton", "monogram", "gucci", "dolce", "prada", "rolex", "hermes", "fendi"];
+const PRICE_BIG_TICKET = ["machine", "generator", "printhead", "print head", "shredder", "granulator", "applicator", "printer", "projector", "laptop", "robot", "terminal", "plc", "inverter", "servo", "ecu", "loveseat", "sofa", "sectional", "desk", "table", "recliner", "dyson", "drone"];
+const PRICE_PRECIOUS = ["carat", "diamond", "gold", "14k", "18k", "10kt", "14kt", "platinum", "cashmere", "shearling"];
+const PRICE_BUDGET = ["hat", "cap ", "scarf", "headscarf", "holder", "saw", "sower", "sensor", "rods", "wall tie", "shorts", "shirt", "hood", "fan", "shawl", "stole", "chasuble", "kit", "pack"];
+const PRICE_CATEGORY_POINTS: Record<string, number> = {
+  "Jewelry & Watches": 6,
+  "Industrial Equipment": 6,
+  Electronics: 4,
+  Furniture: 3,
+  "Audio & Home Theater": 2,
+  "Home & Kitchen": 1,
+  "Tools & Hardware": 1
+};
+
+function priceSeed(id: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+// One-time price spread across the catalog: the costlier-looking third lands
+// in $1000-$5000 and the rest in $50-$1000. Values are pseudo-random but
+// stable per product, and only the sale `price` field is touched.
+function randomizeCatalogPrices(products: any[]): void {
+  const scored = products.map((p) => {
+    const lower = ` ${(p.name || "").toLowerCase()} `;
+    let score = (PRICE_CATEGORY_POINTS[p.category] || 0) + Number(p.price || 0) / 2000;
+    if (PRICE_LUXURY.some((w) => lower.includes(w))) score += 6;
+    if (PRICE_BIG_TICKET.some((w) => lower.includes(w))) score += 5;
+    if (PRICE_PRECIOUS.some((w) => lower.includes(w))) score += 5;
+    if (PRICE_BUDGET.some((w) => lower.includes(w))) score -= 3;
+    return { p, score, r: priceSeed(String(p.id || p.sku || p.name)) };
+  });
+  scored.sort((a, b) => a.score - b.score);
+
+  const highCount = Math.round(scored.length / 3);
+  const lowCount = scored.length - highCount;
+
+  const assign = (group: typeof scored, min: number, max: number) => {
+    group.forEach((item, idx) => {
+      const rankQ = group.length > 1 ? idx / (group.length - 1) : 0.5;
+      const t = Math.min(1, Math.max(0, 0.45 * rankQ + 0.55 * item.r));
+      item.p.price = Math.round(min + t * (max - min));
+    });
+  };
+
+  assign(scored.slice(0, lowCount), 50, 1000);
+  assign(scored.slice(lowCount), 1001, 5000);
+}
+
 // Fills in missing stock/category for products (once), then nudges every
 // product's stock up or down by a small random amount once per calendar
 // day so inventory doesn't sit static. Returns true if anything changed.
@@ -58,6 +111,12 @@ function applyProductMaintenance(db: DB): boolean {
       p.category = inferCategory(p.name);
       changed = true;
     }
+  }
+
+  if (!db.pricesRandomizedV1 && products.length > 0) {
+    randomizeCatalogPrices(products);
+    db.pricesRandomizedV1 = true;
+    changed = true;
   }
 
   const today = new Date().toISOString().slice(0, 10);

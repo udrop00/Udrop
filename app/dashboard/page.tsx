@@ -287,11 +287,11 @@ const orderStats = {
   </span>
 
   <strong>
-    ✓ Verified
+    {data?.user?.kycStatus === "Approved" ? "✓ Verified" : data?.user?.kycStatus === "Rejected" ? "✕ Rejected" : "⏳ Pending"}
   </strong>
 
   <small>
-    KYC Approved Seller
+    {data?.user?.kycStatus === "Approved" ? "KYC Approved Seller" : data?.user?.kycStatus === "Rejected" ? "KYC Rejected" : "KYC Under Review"}
   </small>
 
 </div>
