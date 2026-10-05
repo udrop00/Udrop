@@ -408,6 +408,10 @@ export default function Withdrawal(){
                     Message
                   </th>
 
+                  <th>
+                    Admin Reply
+                  </th>
+
                 </tr>
 
               </thead>
@@ -461,6 +465,15 @@ export default function Withdrawal(){
 
                       <td>
                         {item.message || "-"}
+                      </td>
+
+
+                      <td>
+                        {item.adminMessage ? (
+                          <span style={item.status === "Rejected" ? { color:"#f87171", fontWeight:600 } : undefined}>
+                            {item.status === "Rejected" ? "Reason: " : ""}{item.adminMessage}
+                          </span>
+                        ) : "-"}
                       </td>
 
                     </tr>

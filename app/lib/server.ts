@@ -88,6 +88,19 @@ function randomizeCatalogPrices(products: any[]): void {
   assign(scored.slice(lowCount), 1001, 5000);
 }
 
+// Two catalog entries that duplicated another product's picture are swapped for
+// new items. Matched by SKU; id, SKU and stock are kept.
+const PRODUCT_REPLACEMENTS: { sku: string; data: Record<string, any> }[] = [
+  {
+    sku: "DZ0027",
+    data: { name: "Ray-Ban Glasses", category: "Bags & Accessories", price: 235, image: "/products/ray-ban-glasses-235.png" }
+  },
+  {
+    sku: "DZ0137",
+    data: { name: "Drive Auto UV Light Sanitizer Box", category: "Electronics", price: 758, image: "/products/drive-auto-uv-light-sanitizer-box-758.png" }
+  }
+];
+
 // Fills in missing stock/category for products (once), then nudges every
 // product's stock up or down by a small random amount once per calendar
 // day so inventory doesn't sit static. Returns true if anything changed.
@@ -116,6 +129,15 @@ function applyProductMaintenance(db: DB): boolean {
   if (!db.pricesRandomizedV1 && products.length > 0) {
     randomizeCatalogPrices(products);
     db.pricesRandomizedV1 = true;
+    changed = true;
+  }
+
+  if (!db.productsReplacedV1 && products.length > 0) {
+    for (const r of PRODUCT_REPLACEMENTS) {
+      const p = products.find((x) => x.sku === r.sku);
+      if (p) Object.assign(p, r.data);
+    }
+    db.productsReplacedV1 = true;
     changed = true;
   }
 

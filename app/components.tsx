@@ -766,9 +766,12 @@ onClick={logout}
 
     <div className="brand-row">
 
-  <span
+  <a
+href="https://www.global.ubuy.com/"
+target="_blank"
+rel="noopener noreferrer"
 className="dashboard-logo"
-style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoration: "none", cursor: "default" }}
+style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoration: "none", cursor: "pointer" }}
 >
   <span className="globe-icon" style={{ fontSize: "24px", lineHeight: 1 }}>🌐</span>
   <span className="dashboard-logo-text" style={{ fontWeight: 900, letterSpacing: "0.5px", fontSize: "19px" }}>
@@ -779,7 +782,7 @@ style={{ display: "inline-flex", alignItems: "center", gap: "8px", textDecoratio
       textShadow: "0 0 12px rgba(255, 194, 32, 0.45)" 
     }}>buy</span>
   </span>
-</span>
+</a>
 
 
   <div className="seller-rating" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
